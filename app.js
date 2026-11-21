@@ -40,64 +40,53 @@
     return [Math.round(nm / 26 * 60), Math.round((170 + 10 * nm) / 10) * 10];
   };
 
-  // ---------- Sea-route map: shortest path through waypoints on the base map ----------
-  const MAP = { W: 2200, H: 1399, LON0: 15.55, LON1: 17.45, LAT0: 42.80, LAT1: 43.68, IMG: 'img/map.jpg' };
-  const NODES = { AIR: [43.535, 16.3], K1: [43.505, 16.355], K2: [43.497, 16.41], SPL: [43.503, 16.44], C1: [43.45, 16.4], C2: [43.36, 16.397], C2b: [43.325, 16.396], C3: [43.27, 16.36], P1: [43.2, 16.33], PW: [43.165, 16.313], PS: [43.144, 16.372], PE: [43.153, 16.433], HVR: [43.172, 16.441], H1: [43.235, 16.47], H2: [43.245, 16.6], BOL: [43.261, 16.655], S1: [43.12, 16.52], S2: [43.05, 16.8], S3: [42.98, 17.06], KOR: [42.961, 17.136], VL1: [42.978, 16.617], VLK: [42.963, 16.718], V1: [43.1, 16.28], VIS: [43.061, 16.183], V2: [43.095, 16.12], V3: [43.06, 16.06], KOM: [43.043, 16.09] };
-  const EDGES = [['AIR','K1'],['K1','K2'],['K2','SPL'],['K2','C1'],['SPL','C1'],['C1','C2'],['C2','C2b'],['C2b','C3'],['C3','P1'],['C3','H1'],['P1','PW'],['PW','PS'],['PS','PE'],['PE','HVR'],['PS','V1'],['PW','V1'],['PE','S1'],['HVR','S1'],['H1','H2'],['H2','BOL'],['S1','S2'],['S2','S3'],['S3','KOR'],['S1','VL1'],['S2','VL1'],['VL1','VLK'],['V1','VIS'],['V1','V2'],['V2','V3'],['V3','KOM']];
-  const PORT = { 'Split Airport': 'AIR', 'Split': 'SPL', 'Hvar town': 'HVR', 'Vis': 'VIS', 'Bol': 'BOL', 'Korčula': 'KOR', 'Vela Luka': 'VLK', 'Komiža': 'KOM' };
-  const px = (k) => [(NODES[k][1] - MAP.LON0) / (MAP.LON1 - MAP.LON0) * MAP.W, (MAP.LAT1 - NODES[k][0]) / (MAP.LAT1 - MAP.LAT0) * MAP.H];
-  const ADJ = {};
-  EDGES.forEach(([u, v]) => {
-    const pu = px(u), pv = px(v), w = Math.hypot(pu[0] - pv[0], pu[1] - pv[1]);
-    (ADJ[u] = ADJ[u] || []).push([v, w]); (ADJ[v] = ADJ[v] || []).push([u, w]);
-  });
-  const seaPath = (a, b) => {
-    const dist = {}, prev = {}, todo = new Set(Object.keys(NODES));
-    Object.keys(NODES).forEach((k) => { dist[k] = Infinity; }); dist[a] = 0;
-    while (todo.size) {
-      let u = null; todo.forEach((k) => { if (u === null || dist[k] < dist[u]) u = k; });
-      todo.delete(u); if (u === b) break;
-      (ADJ[u] || []).forEach(([v, w]) => { if (dist[u] + w < dist[v]) { dist[v] = dist[u] + w; prev[v] = u; } });
-    }
-    const out = []; let c = b; while (c) { out.unshift(px(c)); c = prev[c]; }
-    return out;
+  // ---------- Maps: Leaflet + Esri Light Gray; sea routes precomputed by scripts/build-routes.py (routes.js) ----------
+  const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+  const BASE = ESRI + 'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', LABELS = ESRI + 'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+  const ATTR = 'Esri, HERE, Garmin, © OpenStreetMap contributors';
+  const BLUE = '#2D5BE3', DARK = '#1C3FB0';
+  const seaRoute = (i, j) => { const r = window.SEA_ROUTES[i < j ? `${i}-${j}` : `${j}-${i}`]; return i < j ? r.path : [...r.path].reverse(); };
+  const STILL = { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, touchZoom: false, zoomSnap: 0.25 };
+
+  const drawRoute = (map, path, lineCls) => {
+    const line = L.polyline(path, { color: BLUE, weight: 4, lineCap: 'round', lineJoin: 'round', className: lineCls, interactive: false }).addTo(map);
+    line.getElement().setAttribute('pathLength', '1'); // lets CSS draw the line in
+    L.circleMarker(path[0], { radius: 7, weight: 3, color: DARK, fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(map);
+    L.circleMarker(path[path.length - 1], { radius: 9, weight: 3, color: '#fff', fillColor: DARK, fillOpacity: 1, interactive: false }).addTo(map);
   };
-  const smooth = (pts) => {
-    let p = pts;
-    for (let it = 0; it < 2; it++) {
-      const q = [p[0]];
-      for (let i = 0; i < p.length - 1; i++) { const a = p[i], b = p[i + 1]; q.push([a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]); }
-      q.push(p[p.length - 1]); p = q;
-    }
-    return p;
-  };
-  const routeMap = (a, b, AR = 1.75, base = 760) => {
-    const raw = seaPath(PORT[a.name], PORT[b.name]), pts = smooth(raw);
-    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
-    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    let w = Math.max((Math.max(...xs) - Math.min(...xs)) * 1.35, 300), h = Math.max((Math.max(...ys) - Math.min(...ys)) * 1.35 + 60, 180);
-    if (w / h < AR) w = h * AR; else h = w / AR;
-    // Keep the view inside the map image so it always fills the frame
-    if (w > MAP.W) { w = MAP.W; h = w / AR; }
-    if (h > MAP.H) { h = MAP.H; w = h * AR; }
-    const x0 = Math.min(Math.max(cx - w / 2, 0), MAP.W - w), y0 = Math.min(Math.max(cy - h / 2, 0), MAP.H - h);
-    const k = w / base, A = raw[0], Z = raw[raw.length - 1], sq = 12 * k;
-    return {
-      vb: `${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`,
-      d: 'M' + pts.map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L'),
-      sw: (4 * k).toFixed(2), ring: (2.5 * k).toFixed(2), boatR: (6 * k).toFixed(2), pinR: (7 * k).toFixed(2),
-      ax: A[0].toFixed(1), ay: A[1].toFixed(1), bx0: (Z[0] - sq / 2).toFixed(1), by0: (Z[1] - sq / 2).toFixed(1), sq: sq.toFixed(1),
-      aria: `Map of the sea route from ${a.name} to ${b.name}`
+
+  // A white dot that sails along the route, looping every 6 s
+  const sail = (map, path) => {
+    if (reduced) return;
+    const pts = path.map((p) => L.latLng(p)), cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + pts[i - 1].distanceTo(pts[i]));
+    const total = cum[cum.length - 1];
+    const boat = L.circleMarker(pts[0], { radius: 6, weight: 0, fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(map);
+    const t0 = performance.now();
+    const step = (now) => {
+      if (!map._container || !map._container.isConnected) return;
+      const d = ((now - t0) / 6000 % 1) * total;
+      let i = 1; while (i < cum.length - 1 && cum[i] < d) i++;
+      const f = (d - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1);
+      boat.setLatLng([pts[i - 1].lat + (pts[i].lat - pts[i - 1].lat) * f, pts[i - 1].lng + (pts[i].lng - pts[i - 1].lng) * f]);
+      requestAnimationFrame(step);
     };
+    requestAnimationFrame(step);
   };
-  const mapSvg = (m, cls, { boat = false, lineCls = 'mroute', preserve = 'xMidYMid slice', label = '', plain = false } = {}) => `
-    <svg class="${cls}" viewBox="${m.vb}" preserveAspectRatio="${preserve}" ${label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"'}>
-      ${plain ? '' : `<image href="${MAP.IMG}" x="0" y="0" width="${MAP.W}" height="${MAP.H}"></image>`}
-      <path class="${lineCls}" d="${m.d}" pathLength="1" fill="none" stroke="#fff" stroke-width="${m.sw}" stroke-linecap="round" stroke-linejoin="round"></path>
-      ${boat ? `<circle r="${m.boatR}" fill="#0B0B0F" stroke="#fff" stroke-width="${m.ring}"><animateMotion dur="6s" repeatCount="indefinite" path="${m.d}"></animateMotion></circle>` : ''}
-      <circle cx="${m.ax}" cy="${m.ay}" r="${m.pinR}" fill="#fff" stroke="#0B0B0F" stroke-width="${m.ring}"></circle>
-      <rect x="${m.bx0}" y="${m.by0}" width="${m.sq}" height="${m.sq}" fill="#0B0B0F" stroke="#fff" stroke-width="${m.ring}"></rect>
-    </svg>`;
+
+  // Small route maps on the destination cards, created on first hover
+  const minis = new Map();
+  const initMini = (card) => {
+    const el = card.querySelector('.minimap');
+    if (!el || minis.has(el) || !window.L) return;
+    const path = seaRoute(S.o, +card.dataset.dest);
+    const map = L.map(el, STILL);
+    L.tileLayer(BASE, { maxZoom: 16 }).addTo(map);
+    map.fitBounds(L.latLngBounds(path), { padding: [22, 22], maxZoom: 12 });
+    drawRoute(map, path, 'mroute');
+    minis.set(el, map);
+  };
+  const dropMinis = () => { minis.forEach((m) => m.remove()); minis.clear(); };
 
   // ---------- Helpers ----------
   const $ = (s, r = document) => r.querySelector(s);
@@ -109,6 +98,7 @@
   const toTop = () => setTimeout(() => scrollTo(0), 20);
   const toGrid = () => setTimeout(() => { const g = $('#grid'); if (g) scrollTo(g.getBoundingClientRect().top + window.scrollY - 12); }, 40);
   const ARROW = (s = 16) => `<svg class="go" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+  const CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>';
   const BOAT_AVS = `<span class="boatpick" role="img" aria-label="3 boats to choose from"><span class="avs" aria-hidden="true">${BOATS.map((b) => `<img class="av" src="${b.img}" alt="">`).join('')}</span></span>`;
 
   // ---------- State ----------
@@ -135,13 +125,14 @@
     const from = D[S.o];
     const list = D.map((x, k) => ({ x, k })).filter((e) => e.k !== S.o);
     $('#destCount').textContent = list.length;
+    dropMinis();
     $('#cards').innerHTML = list.map(({ x, k }, i) => {
-      const r = route(from, x), map = routeMap(from, x, 1.6, 300);
+      const r = route(from, x);
       return `
       <button type="button" class="box dest" data-dest="${k}" style="animation-delay:${i * 50}ms" aria-label="${esc(`${from.name} to ${x.name}, ${fmt(r[0])}, from ${r[1]} euros`)}">
         <span class="cmedia">
           <img class="cimg" src="${x.img}" alt="${esc(x.alt)}" loading="lazy">
-          ${mapSvg(map, 'minimap')}
+          <span class="minimap" aria-hidden="true"></span>
         </span>
         <span class="cbody">
           <span class="ctitle"><span class="t-h3">${esc(x.name)}</span><span class="ctime">${hm(r[0])}</span></span>
@@ -234,13 +225,16 @@
         </div>
         <div class="bk-row">
           <h2 class="bk-label">Boat</h2>
-          <div class="optlist">
-            ${BOATS.map((b, j) => `
-            <button type="button" class="opt boatopt" data-tier="${j}" aria-pressed="${j === S.tier}">
-              <img src="${b.img}" alt="${esc(b.model)}">
-              <span style="flex:1;min-width:0"><span class="opt-t">${b.name}</span><span class="muted t-14">${esc(b.model)} · ${esc(b.perk)}</span></span>
-              <span class="opt-p">${r[1] + b.add} €</span>
-            </button>`).join('')}
+          <div class="boatgrid">
+            ${BOATS.map((b, j) => { const on = j === S.tier; return `
+            <button type="button" class="box dest boatcard" data-tier="${j}" aria-pressed="${on}">
+              <span class="cmedia"><img class="cimg" src="${b.img}" alt="${esc(b.model)}"></span>
+              <span class="cbody">
+                <span class="ctitle"><span class="t-h3">${b.name}</span><span class="ctime">${esc(b.model)}</span></span>
+                <span class="cmore"><span><span class="muted t-14">${esc(b.perk.charAt(0).toUpperCase() + b.perk.slice(1))}</span></span></span>
+              </span>
+              <span class="cfoot"><span class="muted t-14">${on ? 'Selected' : ''}</span><span class="btn btn-sm">${r[1] + b.add} €${on ? CHECK : ARROW()}</span></span>
+            </button>`; }).join('')}
           </div>
         </div>
         <div class="bk-row">
@@ -259,33 +253,92 @@
 
   const barHTML = (r) => {
     const T = BOATS[S.tier];
+    const when = new Date(`${S.date}T${S.time || '00:00'}`);
+    const whenTxt = isNaN(when) ? '' : ` · ${when.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}, ${S.time}`;
     return `
       <div class="bk-bar" id="bkBar">
         <div class="wrap bk-bar-in">
-          <div class="bk-sum">
-            <span class="t-16 muted fw500">${T.name} boat · ${S.guests} ${S.guests === 1 ? 'guest' : 'guests'}</span>
+          <span class="bk-sum t-16 muted fw500">${T.name} boat · ${S.guests} ${S.guests === 1 ? 'guest' : 'guests'}${whenTxt}</span>
+          <div class="bk-act">
             <span class="bk-total" aria-live="polite">${prices(r).total} €</span>
+            <a href="#" class="gobtn bk-book">Book<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
-          <a href="#" class="gobtn bk-book">Book<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
       </div>`;
   };
 
+  // Hero: a real map fills the screen width; start and destination float next to their pins as photo cards
+  let bkMap = null;
+  const initHero = () => {
+    if (bkMap) { bkMap.remove(); bkMap = null; }
+    const el = $('#bkMap'); if (!el || !window.L) return;
+    const from = D[S.o], to = D[S.m], path = seaRoute(S.o, S.m);
+    const mobile = window.matchMedia('(max-width: 640px)').matches;
+    const mw = el.clientWidth, mh = el.clientHeight;
+    const cw = mobile ? 136 : 208, ch = mobile ? 132 : 192, gap = mobile ? 16 : 24, m = 12;
+    const map = L.map(el, { zoomControl: false, scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false, zoomSnap: 0.25, attributionControl: true });
+    map.attributionControl.setPrefix(false);
+    L.tileLayer(BASE, { maxZoom: 16, attribution: ATTR }).addTo(map);
+    L.tileLayer(LABELS, { maxZoom: 16 }).addTo(map);
+    // leave room beside (desktop) or above/below (mobile) the route for the two cards
+    const pad = mobile ? [24, ch + gap + m] : [cw + gap + m, 56];
+    map.fitBounds(L.latLngBounds(path), { padding: pad, maxZoom: 13 });
+    drawRoute(map, path, 'routeline');
+    sail(map, path);
+
+    const pt = (ll) => { const p = map.latLngToContainerPoint(ll); return [p.x, p.y]; };
+    const A = pt(path[0]), Z = pt(path[path.length - 1]);
+    const rect = ([x, y], dir) => ({ up: [x - cw / 2, y - gap - ch], down: [x - cw / 2, y + gap], left: [x - gap - cw, y - ch / 2], right: [x + gap, y - ch / 2] }[dir]);
+    const clampR = ([x, y], dir) => (dir === 'up' || dir === 'down') ? [Math.min(Math.max(x, m), mw - m - cw), y] : [x, Math.min(Math.max(y, m), mh - m - ch)];
+    const overflow = ([x, y]) => Math.max(0, m - x) + Math.max(0, x + cw - (mw - m)) + Math.max(0, m - y) + Math.max(0, y + ch - (mh - m));
+    const hits = (p, q) => q && p[0] < q[0] + cw + 8 && q[0] < p[0] + cw + 8 && p[1] < q[1] + ch + 8 && q[1] < p[1] + ch + 8;
+    // point away from the other pin along the main axis, then the sides, then towards it
+    const order = (P, O) => {
+      const dx = P[0] - O[0], dy = P[1] - O[1];
+      const h1 = dx < 0 ? 'left' : 'right', v1 = dy < 0 ? 'up' : 'down', h2 = h1 === 'left' ? 'right' : 'left', v2 = v1 === 'up' ? 'down' : 'up';
+      return Math.abs(dx) > Math.abs(dy) ? [h1, v1, v2, h2] : [v1, h1, h2, v2];
+    };
+    const place = (P, O, other) => {
+      let best = null;
+      for (const dir of order(P, O)) {
+        const r = clampR(rect(P, dir), dir), cost = overflow(r) * 10 + (hits(r, other) ? 1000 : 0);
+        if (!best || cost < best.cost) best = { dir, r, cost };
+        if (cost === 0) break;
+      }
+      return best;
+    };
+    const pa = place(A, Z, null), pz = place(Z, A, pa.r);
+    // The card is a marker anchored at its pin, so it follows the map if it's dragged
+    const card = (p, P, pl, label, cls) => {
+      const [x, y] = [pl.r[0] - P[0], pl.r[1] - P[1]], pr = 10;
+      let ln;
+      if (pl.dir === 'up') ln = [-1, y + ch, 2, -pr - (y + ch)];
+      else if (pl.dir === 'down') ln = [-1, pr, 2, y - pr];
+      else if (pl.dir === 'left') ln = [x + cw, -1, -pr - (x + cw), 2];
+      else ln = [pr, -1, x - pr, 2];
+      return L.divIcon({ className: 'bk-pin-ico', iconSize: [0, 0], iconAnchor: [0, 0], html: `
+        <span class="bk-line" style="left:${ln[0]}px;top:${ln[1]}px;width:${Math.max(ln[2], 0)}px;height:${Math.max(ln[3], 0)}px"></span>
+        <figure class="bk-pin ${cls}" style="left:${x}px;top:${y}px">
+          <img src="${p.img}" alt="${esc(p.alt)}">
+          <figcaption><span class="t-12 muted">${label}</span><span class="bk-pin-n">${esc(p.name)}</span></figcaption>
+        </figure>` });
+    };
+    L.marker(path[0], { icon: card(from, A, pa, 'From', 'is-from'), interactive: false, keyboard: false }).addTo(map);
+    L.marker(path[path.length - 1], { icon: card(to, Z, pz, 'To', 'is-to'), interactive: false, keyboard: false, zIndexOffset: 1000 }).addTo(map);
+    bkMap = map;
+  };
+
   const renderBooking = () => {
     const from = D[S.o], to = D[S.m], r = route(from, to);
-    const mw = window.innerWidth, mh = Math.max(window.innerHeight * 0.5, 280);
-    const map = routeMap(from, to, mw / mh, mw);
-
     $('#booking').innerHTML = `
-      <section class="bk-hero">
-        ${mapSvg(map, 'bk-map', { boat: true, lineCls: 'routeline', label: map.aria })}
-      </section>
+      <section class="bk-hero" id="bkHero"><div class="bk-map" id="bkMap" role="img" aria-label="${esc(`Map of the sea route from ${from.name} to ${to.name}`)}"></div></section>
       <section class="wrap bk-main">
-        <h1 class="h-display bk-title">${esc(from.name)} → ${esc(to.name)}</h1>
+        <h1 class="bk-title"><span class="bk-t-from">${esc(from.name)} →</span><span class="bk-t-to">${esc(to.name)}</span></h1>
         <p class="muted bk-sub">${fmt(r[0])} by private boat · ${esc(from.pier)} to ${esc(to.pier.charAt(0).toLowerCase() + to.pier.slice(1))}</p>
         ${optsHTML(r, from, to)}
       </section>
       ${barHTML(r)}`;
+    initHero();
   };
 
   // Re-render only the choices and the bar, so the route animation doesn't replay and focus stays put
@@ -302,12 +355,14 @@
     const bk = isBooking();
     $('#home').hidden = bk;
     $('#booking').hidden = !bk;
-    $('#topbar').classList.toggle('over', !bk);
+    $('#topbar').hidden = bk; // no nav bar on the booking page; browser Back returns home
+    if (!bk && bkMap) { bkMap.remove(); bkMap = null; }
     if (bk) renderBooking(); else { renderFrom(); renderCards(); }
   };
 
   const goHome = () => { S.m = null; showView(); toTop(); };
-  const openDest = (k) => { S.m = k; S.tier = 0; S.ret = false; S.swim = false; setDd(false); showView(); toTop(); };
+  const openDest = (k) => { S.m = k; S.tier = 0; S.ret = false; S.swim = false; setDd(false); history.pushState({ m: k, o: S.o }, ''); showView(); toTop(); };
+  window.addEventListener('popstate', (e) => { S.m = e.state && e.state.m != null ? e.state.m : null; showView(); toTop(); });
 
   // ---------- Events ----------
   document.addEventListener('click', (e) => {
@@ -346,6 +401,16 @@
   r.addEventListener('pointerup', dragEnd);
   r.addEventListener('pointerleave', dragEnd);
   window.addEventListener('scroll', onScroll, { passive: true });
+  // Re-fit the booking map to a new window shape
+  let rw = window.innerWidth, rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (isBooking() && Math.abs(window.innerWidth - rw) >= 40) { rw = window.innerWidth; initHero(); } }, 200);
+  });
+  // Destination cards: build the route map the first time a card is hovered or focused
+  const warm = (e) => { const c = e.target.closest && e.target.closest('.dest[data-dest]'); if (c) initMini(c); };
+  document.addEventListener('pointerover', warm);
+  document.addEventListener('focusin', warm);
 
   // ---------- Why carousel: static frame, content changes every 5 s ----------
   // The active dot's progress bar is a 5 s CSS animation; when it ends we advance. Hover/focus pauses it.
