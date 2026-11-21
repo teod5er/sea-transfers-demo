@@ -1,0 +1,305 @@
+/* Sea Transfers – Hvar Charter
+   Type scale 60/40/28/18/16/14/12 · icons stroke 1.75 · selected = 1.5px outline like buttons */
+
+:root{
+  --blue:#2D5BE3; --blue-dark:#1C3FB0; --blue-tint:#F0F4FF; --blue-soft:#F5F8FF; --blue-hover:#9DB2F2;
+  --ink:#0B0B0F; --muted:#5A606B; --line:#E3E5EA; --line-soft:#ECEEF1; --field:#D5D8DE; --chip:#F2F3F5; --band:#F2F5FF;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --vh:min(100svh, 900px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff}
+a{color:var(--blue)}a:hover{color:var(--blue-dark)}
+img{max-width:100%}
+[hidden]{display:none !important}
+button{font-family:inherit;cursor:pointer}
+svg[stroke] *{vector-effect:non-scaling-stroke}
+
+.hc{font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--ink);background:#fff;position:relative;min-width:0}
+.wrap{max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px}
+
+/* Type */
+.t-h1{font-family:Unbounded,sans-serif;font-weight:800;letter-spacing:-0.02em;font-size:clamp(28px,3vw,40px);line-height:1.1;margin:0}
+.t-h2{font-family:Unbounded,sans-serif;font-weight:700;font-size:28px;line-height:1.15;margin:0}
+.t-h3{font-family:Unbounded,sans-serif;font-weight:700;font-size:18px;line-height:1.25;margin:0}
+.t-16{font-size:16px;line-height:1.5}
+.t-14{font-size:14px;line-height:1.5}
+.t-12{font-size:12px;line-height:1.4}
+.h-display{font-family:Unbounded,sans-serif;font-weight:800;letter-spacing:-0.02em;line-height:1.05;margin:0}
+.h-section{font-family:Unbounded,sans-serif;font-weight:700;font-size:28px;line-height:1.15;margin:0}
+.muted{color:var(--muted)}
+.fw400{font-weight:400}.fw500{font-weight:500}
+
+/* Primitives */
+.box{background:#fff;border:1px solid var(--line);border-radius:16px;transition:border-color .2s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:22px;background:transparent;border:1.5px solid var(--blue);color:var(--blue);font-size:14px;font-weight:600;text-decoration:none;transition:background .2s,transform .12s}
+.btn:hover{background:var(--blue-tint);color:var(--blue-dark)}
+.btn:active{transform:scale(.97)}
+.btn-lg{height:52px;border-radius:26px;font-size:16px;width:100%}
+.btn-sm{height:38px;padding:0 14px 0 16px;border-radius:19px;font-size:14px}
+.iconbtn{width:44px;padding:0}
+.tag{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:8px;background:var(--chip);font-size:14px;font-weight:500;color:var(--ink)}
+.ico{width:48px;height:48px;border-radius:14px;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;flex:none}
+.go{transition:transform .2s}
+.opt{background:#fff;border:1px solid var(--line);color:var(--ink);transition:border-color .2s}
+.opt:hover{border-color:var(--blue-hover)}
+.opt[aria-pressed="true"]{border:1.5px solid var(--blue);background:var(--blue-soft)}
+
+/* Top bar */
+.topbar{position:relative;z-index:30;background:#fff;border-bottom:1px solid var(--line-soft)}
+.topbar.over{position:absolute;left:0;right:0;top:0;background:transparent;border-bottom:0}
+.topbar-in{padding-top:14px;padding-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.wordmark{display:inline-flex;align-items:baseline;gap:6px;background:#fff;border-radius:22px;padding:10px 16px;text-decoration:none}
+.topbar:not(.over) .wordmark{padding-left:0}
+.wm-name{font-family:Unbounded,sans-serif;font-weight:800;font-size:16px;color:var(--blue);letter-spacing:-0.01em}
+.btn.menubtn{height:44px;padding:0 16px 0 18px;background:#fff;border-color:#fff}
+.btn.menubtn:hover{background:var(--blue-tint);border-color:var(--blue-tint)}
+.topbar:not(.over) .btn.menubtn{border-color:var(--blue)}
+
+/* Menu drawer */
+.menu-layer{position:fixed;inset:0;z-index:60}
+.menu-scrim{position:absolute;inset:0;border:0;background:rgba(11,11,15,.45);cursor:default}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(380px,100%);background:#fff;padding:20px 28px 28px;display:flex;flex-direction:column;overflow-y:auto;animation:hcSlide .28s var(--ease) both}
+.drawer-top{display:flex;justify-content:flex-end;margin-bottom:12px}
+.menul{color:var(--ink);text-decoration:none;font-family:Unbounded,sans-serif;font-weight:700;font-size:20px;padding:16px 0;border-bottom:1px solid var(--line-soft)}
+.menul:hover,.menul[aria-current="page"]{color:var(--blue)}
+.drawer-foot{margin-top:auto;padding-top:28px;display:flex;flex-direction:column;gap:10px}
+.langs{text-align:center;margin-top:4px}
+
+/* Hero: 80% of the first screen; the "Going from" bar takes the other 20% */
+.hero{position:relative;height:calc(var(--vh) * .8);min-height:460px;background:var(--blue-dark);overflow:hidden}
+.hero-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
+.hero-in{position:relative;padding-top:104px}
+.hero-card{background:var(--blue);border-radius:20px;padding:28px;max-width:440px}
+.hero-card .t-h1{color:#fff}
+.hero-sub{margin:12px 0 0;color:#E6EDFF}
+.htags{margin:20px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.htag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;border:1.5px solid rgba(255,255,255,.55);color:#fff;font-size:12px;font-weight:600}
+
+/* Going from (sticky) */
+.stickybar{position:sticky;top:0;z-index:25;background:#fff;border-bottom:1px solid var(--line)}
+.frombar{position:relative;z-index:2;background:#fff}
+.frombar button{display:flex;width:100%;border:0;background:transparent;align-items:center;gap:24px;text-align:left;color:var(--ink);height:calc(var(--vh) * .2);min-height:116px;transition:height .3s var(--ease)}
+.stuck .frombar button{height:84px;min-height:0}
+.fthumb{width:96px;height:96px;border-radius:16px;overflow:hidden;flex:none;transition:width .3s,height .3s}
+.fthumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s var(--ease)}
+.stuck .fthumb{width:52px;height:52px;border-radius:12px}
+.frombar:hover .fthumb img{transform:scale(1.05)}
+.from-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.fromname{font-family:Unbounded,sans-serif;font-weight:800;letter-spacing:-0.02em;font-size:clamp(28px,3.4vw,48px);line-height:1.05;transition:font-size .3s}
+.stuck .fromname{font-size:24px}
+.ddbtn{width:56px;height:56px;padding:0;border-radius:50%;flex:none;pointer-events:none}
+.frombar:hover .ddbtn{background:var(--blue-tint)}
+.chev{transition:transform .25s}
+[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.stuck .chev{transform:rotate(180deg)}
+.stuck [aria-expanded="true"] .chev{transform:none}
+
+.oppanel{position:absolute;left:0;right:0;z-index:1;background:#fff}
+.oppanel.up{bottom:100%;border-radius:24px 24px 0 0;animation:hcUp .35s var(--ease) both}
+.oppanel.down{top:100%;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line);animation:hcDown .3s var(--ease) both}
+.rail{padding-top:24px;padding-bottom:24px;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.drag{cursor:grab;user-select:none;-webkit-user-select:none}
+.drag:active{cursor:grabbing}
+.drag img{-webkit-user-drag:none}
+.ocard{border:0;padding:0;background:transparent;text-align:left;display:flex;flex-direction:column;gap:8px;flex:none;scroll-snap-align:start;transition:transform .15s}
+.ocard:active{transform:scale(.96)}
+.osq{display:block;width:120px;aspect-ratio:1/1;border-radius:14px;overflow:hidden;border:1.5px solid transparent;transition:border-color .2s}
+.osq img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.ocard:hover .osq{border-color:var(--blue-hover)}
+.ocard:hover .osq img{transform:scale(1.06)}
+.ocard[aria-pressed="true"] .osq{border-color:var(--blue)}
+.oname{color:var(--ink);font-weight:600}
+
+/* Destination cards */
+.grid-sec{padding-top:32px}
+.grid-head{margin:0 0 16px;font-weight:600}
+.dgrid,.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.dest{padding:0;overflow:hidden;text-align:left;color:var(--ink);display:flex;flex-direction:column;text-decoration:none;transition:border-color .2s,transform .15s}
+.dest:hover{border-color:var(--blue);box-shadow:0 0 0 .5px var(--blue);color:var(--ink)}
+.dest:active{transform:scale(.985)}
+.dest:hover .btn{background:var(--blue-tint)}
+.dest:hover .go{transform:translateX(3px)}
+.dgrid .dest{animation:hcPop .5s var(--ease) both}
+.cmedia{position:relative;display:block;width:100%;aspect-ratio:16/10;overflow:hidden;background:var(--blue)}
+.cimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease)}
+.dest:hover .cimg{transform:scale(1.04)}
+.minimap{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s ease}
+.dest:hover .minimap,.dest:focus-visible .minimap{opacity:1}
+.mroute{stroke-dasharray:1;stroke-dashoffset:1}
+.dest:hover .mroute,.dest:focus-visible .mroute{animation:hcRoute 1.1s .1s cubic-bezier(.4,0,.2,1) forwards}
+.hov{opacity:0;transition:opacity .25s}
+.dest:hover .hov,.dest:focus-visible .hov{opacity:1}
+@media (hover:none){.hov{opacity:1}}
+.ctime{position:absolute;left:10px;top:10px;background:#fff}
+.cbody{padding:16px 16px 4px;display:flex;flex-direction:column;gap:4px;width:100%;flex:1}
+.cfoot{padding:12px 16px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.boatpick{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.avs{display:flex}
+.av{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid #fff;transition:margin .3s var(--ease)}
+.av+.av{margin-left:-10px}
+.dest:hover .av+.av{margin-left:-4px}
+
+/* Why */
+.whyband{margin-top:72px;background:var(--band)}
+.why-in{padding-top:96px;padding-bottom:104px}
+.why-sub{margin:12px 0 48px;max-width:560px}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:40px 32px}
+.why-grid .t-h3{margin:16px 0 0}
+.why-grid p{margin:8px 0 0}
+
+/* Sections */
+.sec{padding-top:56px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.sec-sub{margin:8px 0 0}
+.xcard img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.xbody{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.xfoot{margin-top:auto;padding-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* FAQ */
+.faq-head{margin-bottom:16px}
+.faqbox{padding:0 24px}
+.faq{border-bottom:1px solid var(--line-soft);padding:16px 0}
+.faq:last-child{border-bottom:0}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;font-weight:600;transition:color .2s}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{color:var(--blue)}
+.faq p{margin:8px 0 0}
+.plus{color:var(--blue);display:flex;flex:none;transition:transform .2s}
+details[open] .plus{transform:rotate(45deg)}
+
+/* Booking */
+.bk-head{padding-top:20px}
+.backlink{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;text-decoration:none}
+.bk-title{margin-top:14px;font-size:clamp(26px,3vw,38px)}
+.bk-sub{margin:6px 0 0;font-size:16px}
+.bk-body{padding-top:20px;padding-bottom:40px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.journey{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.mapbox{position:relative;height:clamp(280px,42vw,440px);overflow:hidden;background:var(--blue)}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.maptag{position:absolute;left:14px;top:14px;background:#fff}
+.routeline{stroke-dasharray:1;stroke-dashoffset:1;animation:hcRoute 1.4s .2s cubic-bezier(.4,0,.2,1) forwards}
+.jbox{padding:18px 20px}
+.jbox h2{margin:0 0 14px;font-size:16px;font-weight:700}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.steps li{display:flex;gap:14px}
+.rail-col{display:flex;flex-direction:column;align-items:center;flex:none;width:14px}
+.dot-a{width:12px;height:12px;border-radius:50%;border:2.5px solid var(--ink);margin-top:4px}
+.dot-b{width:12px;height:12px;background:var(--ink)}
+.vline{flex:1;width:2px;background:var(--field);margin:4px 0}
+.vstub{width:2px;height:6px;background:var(--field)}
+.step-t{display:block;font-size:16px;font-weight:600}
+.step-pad{padding-bottom:16px}
+
+.bpanel{flex:1 1 340px;min-width:0;position:sticky;top:16px;padding:20px;display:flex;flex-direction:column;gap:18px}
+.dt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600}
+.field input{height:44px;border:1px solid var(--field);border-radius:10px;padding:0 10px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;width:100%}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.guests{display:flex;align-items:center;justify-content:space-between}
+.stepper{display:flex;align-items:center;gap:4px;border:1px solid var(--field);border-radius:22px;padding:2px}
+.stepper button{width:38px;height:38px;border-radius:50%;border:0;background:transparent;color:var(--blue);font-size:20px}
+.stepper button:hover{background:var(--blue-tint)}
+.stepper output{min-width:22px;text-align:center;font-weight:600}
+.bp-h{margin:0 0 8px;font-size:14px;font-weight:700}
+.optlist{display:flex;flex-direction:column;gap:8px}
+.boatopt{border-radius:12px;padding:6px 12px 6px 6px;display:flex;align-items:center;gap:12px;text-align:left}
+.boatopt img{width:64px;height:46px;border-radius:8px;object-fit:cover;flex:none}
+.extraopt{border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;text-align:left}
+.opt-t{display:block;font-size:14px;font-weight:600}
+.opt-p{font-size:14px;font-weight:600}
+.mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--blue);color:var(--blue);display:flex;align-items:center;justify-content:center;flex:none}
+.totalrow{border-top:1px solid var(--line-soft);padding-top:14px;display:flex;align-items:baseline;justify-content:space-between}
+.total{font-family:Unbounded,sans-serif;font-weight:800;font-size:24px}
+.confirm{margin:-8px 0 0;font-size:12px;text-align:center}
+
+.xsell{padding-top:8px;padding-bottom:56px}
+.xsell-sub{margin:6px 0 18px;font-size:14px}
+.xsell .cgrid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.xsell .xbody{padding:14px 16px 16px;gap:6px}
+.xsell .xt{font-family:Unbounded,sans-serif;font-weight:700;font-size:16px}
+.xsell .btn-sm{align-self:flex-start;margin-top:8px}
+
+/* Footer */
+.foot{background:var(--ink);color:#fff;margin-top:64px}
+.foot-in{padding-top:28px;padding-bottom:28px;display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between;align-items:center;font-size:14px;color:#B5BAC4}
+.foot a{color:#B5BAC4}
+.foot-in > span:first-child a{color:#fff}
+.foot-links{display:flex;flex-wrap:wrap;gap:6px 18px}
+
+/* Motion */
+@keyframes hcUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes hcDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes hcPop{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes hcKB{from{transform:scale(1)}to{transform:scale(1.07)}}
+@keyframes hcSlide{from{transform:translateX(100%)}to{transform:none}}
+@keyframes hcRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes hcIn{from{opacity:0}to{opacity:1}}
+@keyframes hcRoute{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.kb{animation:hcKB 18s ease-in-out infinite alternate}
+.rise{animation:hcRise .6s var(--ease) both}
+.fade{animation:hcIn .35s both}
+@supports (animation-timeline: view()){.reveal{animation:hcRise linear both;animation-timeline:view();animation-range:entry 0% cover 22%}}
+@media (prefers-reduced-motion: reduce){
+  .kb,.rise,.reveal,.dgrid .dest,.oppanel,.drawer,.fade{animation:none !important}
+  .cimg,.fthumb img,.av,.frombar button,.fthumb,.fromname{transition:none !important}
+  .routeline,.mroute{stroke-dashoffset:0;animation:none !important}
+}
+
+/* Mobile (390 artboards) */
+@media (max-width:640px){
+  .wrap{padding-left:16px;padding-right:16px}
+  .topbar-in{padding-top:12px;padding-bottom:12px}
+  .topbar.over .topbar-in{padding-left:12px;padding-right:12px}
+  .wordmark{padding:9px 14px;gap:5px}
+  .wm-name{font-size:14px}
+  .btn.menubtn{height:40px;padding:0 14px 0 16px}
+  .hero{min-height:0}
+  .hero-media{object-position:38% 62%}
+  .hero-in{padding:76px 12px 16px}
+  .hero-card{border-radius:16px;padding:18px 16px}
+  .hero-card .t-h1{font-size:24px}
+  .htags{margin-top:14px;gap:6px}
+  .htag{height:28px;padding:0 9px;border-radius:14px;gap:5px}
+  .frombar button{gap:14px;min-height:0}
+  .fthumb{width:72px;height:72px;border-radius:14px}
+  .fromname{font-size:28px}
+  .from-text{gap:4px}
+  .from-text .t-16{font-size:14px}
+  .stuck .fromname{font-size:20px}
+  .ddbtn{width:44px;height:44px}
+  .oppanel.up{border-radius:20px 20px 0 0}
+  .rail{padding-top:20px;padding-bottom:20px;gap:10px}
+  .osq{width:96px;border-radius:12px}
+  .grid-sec{padding-top:24px}
+  .grid-head{margin-bottom:12px}
+  .dgrid{grid-template-columns:1fr}
+  .cbody{padding:12px 14px 4px;gap:2px}
+  .cbody .t-h3{font-size:16px}
+  .cbody .t-14{font-size:12px}
+  .cfoot{padding:8px 14px 14px}
+  .whyband{margin-top:40px}
+  .why-in{padding-top:56px;padding-bottom:64px}
+  .whyband .t-h1{font-size:26px}
+  .why-sub{margin:10px 0 32px;font-size:14px}
+  .why-grid{gap:28px}
+  .ico{width:44px;height:44px;border-radius:12px}
+  .why-grid .t-h3{font-size:16px;margin-top:12px}
+  .why-grid p{margin-top:6px}
+  .sec{padding-top:32px}
+  .t-h2,.h-section{font-size:20px}
+  .sec-head{margin-bottom:14px}
+  /* cross-sell rail: swipe horizontally */
+  .cgrid.swipe{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-right:-16px;padding-right:16px;scrollbar-width:none}
+  .cgrid.swipe::-webkit-scrollbar{display:none}
+  .cgrid.swipe > *{flex:none;width:240px;scroll-snap-align:start}
+  .faqbox{padding:0 16px}
+  .faq{padding:14px 0}
+  .faq summary{font-size:14px;gap:12px}
+  .bk-body{gap:16px}
+  .bpanel{position:static}
+  .foot{margin-top:40px}
+  .foot-in{padding-top:18px;padding-bottom:18px;font-size:12px}
+}
