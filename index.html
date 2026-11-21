@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="">
+<link rel="stylesheet" href="styles.css?v=62">
 </head>
 <body>
 <div class="hc">
@@ -19,8 +19,23 @@
   <div class="wrap topbar-in">
     <a href="#" class="wordmark" data-home aria-label="Sea Transfers by Hvar Charter, home">
       <span class="wm-text">Sea Transfers</span>
+      <span class="wm-by">by Hvar Charter</span>
     </a>
-    <a href="https://hvarcharter.com" class="btn menubtn backbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Back to Hvar Charter</span></a>
+    <div class="nav-r">
+      <!-- Language: dropdown, styled like the Back to Hvar Charter button -->
+      <div class="lang" id="lang">
+        <button type="button" class="btn menubtn lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList" aria-label="Language: English">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+          <span id="langCur">EN</span>
+          <svg class="lang-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="lang-list" id="langList" role="listbox" aria-label="Language" tabindex="-1" hidden>
+          <li role="option" data-lang="en" aria-selected="true" tabindex="-1">English</li>
+          <li role="option" data-lang="hr" aria-selected="false" tabindex="-1">Hrvatski</li>
+        </ul>
+      </div>
+    <a href="https://hvarcharter.com" class="btn menubtn backbtn" aria-label="Back to Hvar Charter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Back to Hvar Charter</span></a>
+    </div>
   </div>
 </header>
 
@@ -31,15 +46,19 @@
   <!-- HERO -->
   <section class="hero">
     <div class="wrap hero-in">
+      <div class="hero-boxes">
       <div class="hero-card rise">
         <h1 class="t-h1">Skip the traffic.<br>Take the sea.</h1>
         <p class="t-16 hero-sub">Private speedboats from Split and Hvar to every island harbour. Your skipper waits at the pier.</p>
-        <ul class="hchecks">
-          <li class="rise" style="animation-delay:.25s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>No road traffic</li>
-          <li class="rise" style="animation-delay:.32s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>Leave when you want</li>
-          <li class="rise" style="animation-delay:.39s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>One price per boat</li>
-          <li class="rise" style="animation-delay:.46s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>Luggage on board</li>
-        </ul>
+        <!-- One benefit at a time, rotating (app.js); the full list stays available to screen readers -->
+        <p class="hrot rise" style="animation-delay:.25s" aria-hidden="true"><span class="hcheck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span><span class="hrot-t" id="hrot">No road traffic</span></p>
+        <ul class="sr-only"><li>No road traffic</li><li>Leave when you want</li><li>One price per boat</li><li>Luggage on board</li></ul>
+      </div>
+      <!-- Most booked routes as chips, in their own container below the hero box (filled by app.js) -->
+      <div class="hero-pop rise" style="animation-delay:.15s">
+        <h2 class="hero-pop-h">Most booked</h2>
+        <ul class="chips" id="popList"></ul>
+      </div>
       </div>
     </div>
   </section>
@@ -49,11 +68,11 @@
     <div class="frombar" id="frombar">
       <div class="fb-summary wrap" id="fbSummary">
         <button type="button" class="fb-pick" id="fromBtn" aria-expanded="false" aria-controls="fbGallery">
-          <span class="fthumb"><img id="fromImg" src="img/split-airport.jpg" alt=""></span>
+          <span class="fthumb"><img id="fromImg" src="img/hvar.jpg" alt=""></span>
           <span class="from-text">
             <span class="t-16 muted fw500">Going from</span>
             <span class="fromname-row">
-              <span class="fromname" id="fromName">Split Airport</span>
+              <span class="fromname" id="fromName">Hvar town</span>
             </span>
           </span>
         </button>
@@ -68,6 +87,7 @@
         <div class="wrap fb-gal-in">
           <div class="fb-gal-head">
             <span class="t-16 muted fw500">Going from</span>
+            <button type="button" class="btn iconbtn fb-close" id="fbClose" aria-label="Close" tabindex="-1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           </div>
           <div id="origin-panel" class="rail drag" role="group" aria-label="Starting point"></div>
         </div>
@@ -139,14 +159,50 @@
 <!-- FOOTER -->
 <footer class="foot">
   <div class="wrap foot-in">
-    <span>© 2026 Hvar Charter · Riva 13, Hvar · <a href="tel:+385916129515">+385 91 612 9515</a></span>
-    <span class="foot-map">Maps: Esri, HERE, Garmin, © OpenStreetMap contributors</span>
-    <span class="foot-links"><a href="#">Private Tours</a><a href="#">Boats</a><a href="#">Instagram</a><a href="#">Privacy</a><a href="#">Terms</a></span>
+    <div class="foot-row">
+      <span class="foot-wm">Sea Transfers <span>by Hvar Charter</span></span>
+      <span class="foot-links"><a href="tel:+385916129515">+385 91 612 9515</a><a href="https://wa.me/385916129515">WhatsApp</a><a href="#">Instagram</a></span>
+    </div>
+    <div class="foot-row foot-small">
+      <span>© 2026 Hvar Charter · Riva 13, Hvar</span>
+      <span class="foot-links"><a href="#">Privacy</a><a href="#">Terms</a></span>
+      <span class="foot-map">Maps: <a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></span>
+    </div>
   </div>
 </footer>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="routes.js?v=15"></script>
-<script src="app.js?v=15"></script>
+<!-- Fullscreen date & time picker (app.js) -->
+<div class="picker" id="picker" role="dialog" aria-modal="true" aria-labelledby="pkTitle" hidden>
+  <div class="wrap pk-top">
+    <h2 class="t-h2" id="pkTitle">Choose a date</h2>
+    <button type="button" class="btn iconbtn" data-pk-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="pk-body">
+    <div class="wrap pk-in">
+      <section class="pk-sec" data-step="date" aria-labelledby="pkMonth">
+        <div class="pk-mhead">
+          <button type="button" class="btn iconbtn" data-pk-month="-1" aria-label="Previous month"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <h3 class="pk-month" id="pkMonth" aria-live="polite"></h3>
+          <button type="button" class="btn iconbtn" data-pk-month="1" aria-label="Next month"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="pk-dow" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="pk-days" id="pkDays" role="group" aria-label="Day"></div>
+      </section>
+      <section class="pk-sec" data-step="time" aria-labelledby="pkTimeH">
+        <div class="pk-mhead"><h3 class="pk-month" id="pkTimeH"></h3></div>
+        <div class="pk-times" id="pkTimes" role="group" aria-labelledby="pkTimeH"></div>
+      </section>
+    </div>
+  </div>
+  <div class="pk-bar">
+    <div class="wrap pk-bar-in">
+      <span class="pk-sum" id="pkSum" aria-live="polite"></span>
+      <button type="button" class="gobtn pk-ok" data-pk-ok>Done</button>
+    </div>
+  </div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin=""></script>
+<script src="routes.js?v=62"></script>
+<script src="app.js?v=62"></script>
 </body>
 </html>
