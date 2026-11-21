@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 <div class="hc">
@@ -17,30 +17,9 @@
 <header class="topbar over" id="topbar">
   <div class="wrap topbar-in">
     <a href="#" class="wordmark" data-home aria-label="Sea Transfers by Hvar Charter, home">
-      <span class="wm-name">Sea Transfers</span>
-      <span class="t-12 muted">by Hvar Charter</span>
+      <span class="wm-text">Sea Transfers</span>
     </a>
-    <button type="button" class="btn menubtn" id="menuOpen" aria-label="Open menu" aria-expanded="false" aria-controls="main-menu">
-      <span>Menu</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-  </div>
-  <div class="menu-layer" id="menuLayer" hidden>
-    <button type="button" class="menu-scrim fade" data-close-menu aria-label="Close menu" tabindex="-1"></button>
-    <nav id="main-menu" aria-label="Main" class="drawer">
-      <div class="drawer-top">
-        <button type="button" class="btn iconbtn" data-close-menu aria-label="Close menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      </div>
-      <a href="#" class="menul">Group Excursions</a>
-      <a href="#" class="menul">Private Tours</a>
-      <a href="#" class="menul" aria-current="page">Sea Transfers</a>
-      <a href="#" class="menul">Boats</a>
-      <a href="#" class="menul">About Us</a>
-      <div class="drawer-foot">
-        <a href="#" class="btn btn-lg">Contact us</a>
-        <a href="tel:+385916129515" class="btn btn-lg">+385 91 612 9515</a>
-        <span class="muted t-14 langs">English · Hrvatski · Deutsch</span>
-      </div>
-    </nav>
+    <a href="https://hvarcharter.com" class="btn menubtn backbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span>Back to Hvar Charter</span></a>
   </div>
 </header>
 
@@ -50,38 +29,48 @@
 
   <!-- HERO -->
   <section class="hero">
-    <picture>
-      <source media="(max-width: 640px)" srcset="img/hero-mobile.jpg">
-      <img class="hero-media kb" src="img/hero.jpg" alt="" aria-hidden="true">
-    </picture>
     <div class="wrap hero-in">
       <div class="hero-card rise">
-        <h1 class="t-h1">Skip the traffic. Take the sea.</h1>
-        <p class="t-14 hero-sub">Private boat transfers between Split and the islands.</p>
-        <ul class="htags">
-          <li class="htag rise" style="animation-delay:.25s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>No road traffic</li>
-          <li class="htag rise" style="animation-delay:.32s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Leave when you want</li>
-          <li class="htag rise" style="animation-delay:.39s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>One price per boat</li>
-          <li class="htag rise" style="animation-delay:.46s"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Luggage on board</li>
+        <h1 class="t-h1">Skip the traffic.<br>Take the sea.</h1>
+        <p class="t-16 hero-sub">Private speedboats from Split and Hvar to every island harbour. Your skipper waits at the pier.</p>
+        <ul class="hchecks">
+          <li class="rise" style="animation-delay:.25s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>No road traffic</li>
+          <li class="rise" style="animation-delay:.32s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>Leave when you want</li>
+          <li class="rise" style="animation-delay:.39s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>One price per boat</li>
+          <li class="rise" style="animation-delay:.46s"><span class="hcheck" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>Luggage on board</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- STARTING POINT: sticky; the picker opens upward over the hero, or downward once stuck -->
+  <!-- STARTING POINT: sticky bar. Tapping the port swaps the bar for a gallery of ports. -->
   <div id="origins" class="stickybar">
-    <div class="oppanel up" id="oppanel" hidden>
-      <div id="origin-panel" class="wrap rail drag" role="group" aria-label="Starting point"></div>
-    </div>
-    <div class="frombar">
-      <button type="button" class="wrap" id="fromBtn" aria-expanded="false" aria-controls="origin-panel">
-        <span class="fthumb"><img id="fromImg" src="img/split-airport.jpg" alt=""></span>
-        <span class="from-text">
-          <span class="t-16 muted fw500">Going from</span>
-          <span class="fromname" id="fromName">Split Airport</span>
-        </span>
-        <span class="btn ddbtn" aria-hidden="true"><svg class="chev" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></span>
-      </button>
+    <div class="frombar" id="frombar">
+      <div class="fb-summary wrap" id="fbSummary">
+        <button type="button" class="fb-pick" id="fromBtn" aria-expanded="false" aria-controls="fbGallery">
+          <span class="fthumb"><img id="fromImg" src="img/split-airport.jpg" alt=""></span>
+          <span class="from-text">
+            <span class="t-16 muted fw500">Going from</span>
+            <span class="fromname-row">
+              <span class="fromname" id="fromName">Split Airport</span>
+            </span>
+          </span>
+        </button>
+        <button type="button" class="ddbtn" id="ddBtn" aria-label="Change starting point" aria-expanded="false" aria-controls="fbGallery">
+          <span class="ddbtn-t">Change</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button type="button" class="gobtn" id="goBtn" aria-label="Continue to destinations">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="fb-gallery" id="fbGallery" aria-hidden="true">
+        <div class="wrap fb-gal-in">
+          <div class="fb-gal-head">
+            <span class="t-16 muted fw500">Going from</span>
+          </div>
+          <div id="origin-panel" class="rail drag" role="group" aria-label="Starting point"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -94,13 +83,29 @@
   <!-- WHY SEA TRANSFERS -->
   <section class="whyband">
     <div class="wrap why-in">
-      <h2 class="t-h1 reveal">Why Sea Transfers</h2>
+      <h2 class="t-h1 reveal">Why travel by sea</h2>
       <p class="muted t-16 reveal why-sub">The fastest way between Split and the islands in summer, without the ferry queue.</p>
-      <div class="why-grid">
-        <div class="reveal"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3 class="t-h3">Your time, not a timetable</h3><p class="muted t-14">Leave early, late or right after landing. The boat waits for you.</p></div>
-        <div class="reveal"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l3-9h12l3 9z"/><path d="M3 20c2 1.5 4 1.5 6 0 2 1.5 4 1.5 6 0 2 1.5 4 1.5 6 0"/></svg></span><h3 class="t-h3">Straight from pier to pier</h3><p class="muted t-14">No bus into Split, no port queue, no drive across the island.</p></div>
-        <div class="reveal"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V4h6v3"/></svg></span><h3 class="t-h3">One price for the boat</h3><p class="muted t-14">Skipper and luggage included, however many of you travel.</p></div>
-        <div class="reveal"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><h3 class="t-h3">Local, licensed skippers</h3><p class="muted t-14">[Years] on Hvar. We know every bay, port and weather window.</p></div>
+      <div class="box why-frame reveal" id="why" role="region" aria-roledescription="carousel" aria-label="Why travel by sea">
+        <div class="why-slides" aria-live="polite">
+          <div class="why-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 4">
+            <div><h3 class="why-t">Your time, not a timetable</h3><p class="muted why-p">Leave early, late or right after landing. The boat waits for you.</p></div>
+          </div>
+          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="2 of 4" aria-hidden="true">
+            <div><h3 class="why-t">Straight from pier to pier</h3><p class="muted why-p">No bus into Split, no port queue, no drive across the island.</p></div>
+          </div>
+          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="3 of 4" aria-hidden="true">
+            <div><h3 class="why-t">One price for the boat</h3><p class="muted why-p">Skipper and luggage included, however many of you travel.</p></div>
+          </div>
+          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="4 of 4" aria-hidden="true">
+            <div><h3 class="why-t">Local, licensed skippers</h3><p class="muted why-p">[Years] on Hvar. We know every bay, port and weather window.</p></div>
+          </div>
+        </div>
+        <div class="why-nav">
+            <button type="button" class="why-dot" data-why="0" aria-label="Show 1: Your time, not a timetable" aria-current="true"><span class="why-bar"></span></button>
+            <button type="button" class="why-dot" data-why="1" aria-label="Show 2: Straight from pier to pier"><span class="why-bar"></span></button>
+            <button type="button" class="why-dot" data-why="2" aria-label="Show 3: One price for the boat"><span class="why-bar"></span></button>
+            <button type="button" class="why-dot" data-why="3" aria-label="Show 4: Local, licensed skippers"><span class="why-bar"></span></button>
+        </div>
       </div>
     </div>
   </section>
@@ -138,6 +143,6 @@
   </div>
 </footer>
 </div>
-<script src="app.js"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
