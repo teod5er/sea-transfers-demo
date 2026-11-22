@@ -47,13 +47,8 @@
   const seaRoute = (i, j) => { const r = window.SEA_ROUTES[i < j ? `${i}-${j}` : `${j}-${i}`]; return i < j ? r.path : [...r.path].reverse(); };
   let stylePromise = null;
   const mapStyle = () => stylePromise || (stylePromise = fetch(STYLE_URL).then((res) => res.json()).then((st) => {
-    // Brand palette, like the rest of the page: dark-blue sea, pale land, a whisper of relief
-    st.layers = st.layers.filter((l) => l.type === 'background' || l.type === 'raster' || l.id === 'water');
-    st.layers.forEach((l) => {
-      if (l.type === 'background') l.paint = { 'background-color': '#F4F5FC' };
-      if (l.type === 'raster') l.paint = { ...(l.paint || {}), 'raster-opacity': 0.18, 'raster-saturation': -1 };
-      if (l.id === 'water') l.paint = { 'fill-color': DARK, 'fill-antialias': true };
-    });
+    // Full "Liberty" map (land cover, parks, roads, buildings, relief, water) with every text/icon layer removed
+    st.layers = st.layers.filter((l) => l.type !== 'symbol' && l.type !== 'fill-extrusion' && !/^boundary/.test(l.id));
     return st;
   }));
   const ll = (p) => [p[1], p[0]];
@@ -79,10 +74,11 @@
     let alive = true; map.on('remove', () => { alive = false; });
     map.on('load', () => {
       map.addSource('route', { type: 'geojson', data: lineData(reduced ? coords : [coords[0], coords[0]]) });
-      map.addLayer({ id: 'route', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': 4 } });
+      map.addLayer({ id: 'route-casing', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fff', 'line-width': 8 } });
+      map.addLayer({ id: 'route', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': DARK, 'line-width': 4 } });
       map.addSource('pins', { type: 'geojson', data: { type: 'FeatureCollection', features: [{ ...ptData(coords[0]), properties: { k: 'a' } }, { ...ptData(coords[coords.length - 1]), properties: { k: 'z' } }] } });
       map.addLayer({ id: 'pins', type: 'circle', source: 'pins', paint: {
-        'circle-radius': ['match', ['get', 'k'], 'z', 9, 7], 'circle-color': ['match', ['get', 'k'], 'z', BLUE, '#fff'],
+        'circle-radius': ['match', ['get', 'k'], 'z', 9, 7], 'circle-color': ['match', ['get', 'k'], 'z', DARK, '#fff'],
         'circle-stroke-width': 3, 'circle-stroke-color': ['match', ['get', 'k'], 'z', '#fff', DARK] } });
       if (reduced) return;
       // draw the route in, then (hero only) sail a boat along it
@@ -174,7 +170,7 @@
   const CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>';
 
   // ---------- State ----------
-  const S = { o: 2, m: null, tier: 0, ret: false, swim: false, dd: false, stuck: false, date: '2027-06-14', time: '14:00', note: '', noteOpen: false, tried: false, sent: false, details: { first: '', last: '', email: '', phone: '', cc: guessCC() } };
+  const S = { o: 2, m: null, tier: 0, ret: false, swim: false, dd: false, stuck: false, date: '2027-06-14', time: '14:00', note: '', noteOpen: false, flight: null, pick: null, drop: null, pinEdit: null, tried: false, sent: false, details: { first: '', last: '', email: '', phone: '', cc: 'HR' } };
   const isBooking = () => S.m !== null && S.m !== S.o;
 
   // ---------- Home ----------
@@ -183,11 +179,14 @@
     $('#fromName').textContent = from.name;
     $('#fromImg').src = from.img;
     $('#fromBtn').setAttribute('aria-label', `Going from ${from.name}. Change starting point`);
+    // flight segment shows the flight once it's added
+    const fv = $('#fbFlightV'), fb = $('.fb-fl');
+    if (fv) { fv.textContent = S.flight ? `${S.flight.code} · lands ${S.flight.time}` : 'Start with your flight number'; fb.classList.toggle('on', !!S.flight); fb.setAttribute('aria-label', S.flight ? `Flight ${S.flight.code}, lands ${S.flight.time}. Change flight` : 'Start with your flight number'); }
   };
 
   const renderOrigins = () => {
     $('#origin-panel').innerHTML = D.map((x, k) => `
-      <button type="button" class="ocard" data-origin="${k}" aria-pressed="${k === S.o}" style="animation-delay:${60 + k * 35}ms">
+      <button type="button" class="ocard" data-origin="${k}" aria-pressed="${k === S.o}" style="animation-delay:${80 + k * 55}ms">
         <span class="osq"><img src="${x.img}" alt="" draggable="false"></span>
         <span class="t-14 oname">${esc(x.name)}</span>
       </button>`).join('');
@@ -196,7 +195,6 @@
   const renderCards = () => {
     const from = D[S.o];
     const list = D.map((x, k) => ({ x, k })).filter((e) => e.k !== S.o);
-    $('#destCount').textContent = list.length;
     dropMinis();
     $('#cards').innerHTML = list.map(({ x, k }, i) => {
       const r = route(from, x);
@@ -209,7 +207,6 @@
         <span class="cbody">
           <span class="cfrom">${esc(from.name)} →</span>
           <span class="t-h3">${esc(x.name)}</span>
-          <span class="cmore"><span><span class="muted t-14">${esc(x.desc)}</span></span></span>
         </span>
         <span class="cfoot"><span class="ctime">${hm(r[0])}</span><span class="btn btn-sm">From ${r[1]} €${ARROW()}</span></span>
       </button>`;
@@ -221,22 +218,13 @@
       <img src="${s.img}" alt="${esc(s.alt)}" loading="lazy">
       <span class="xbody">
         <span class="${withTag ? 't-h3' : 'xt'}">${esc(s.title)}</span>
-        <span class="muted t-14">${esc(s.text)}</span>
         ${withTag
           ? `<span class="xfoot"><span class="tag">${esc(s.tag)}</span><span class="btn btn-sm">${esc(s.cta)}${ARROW()}</span></span>`
           : `<span class="btn btn-sm">${esc(s.cta)}${ARROW(15)}</span>`}
       </span>
     </a>`;
 
-  // Hero: most booked routes ([from, to] indexes into D)
-  const POPULAR = [[0, 2], [2, 0], [1, 2], [2, 3]];
-  const renderPop = () => {
-    $('#popList').innerHTML = POPULAR.map(([a, b]) => {
-      const r = route(D[a], D[b]);
-      return `
-        <li><button type="button" class="chip" data-pop="${a}-${b}" aria-label="${esc(`${D[a].name} to ${D[b].name}, ${fmt(r[0])}, from ${r[1]} euros`)}">${esc(D[a].name)} → ${esc(D[b].name)}<span class="chip-p">${r[1]} €</span></button></li>`;
-    }).join('');
-  };
+
 
   const renderHC = () => { $('#hcCards').innerHTML = HC.map((s) => xCard(s, true)).join(''); };
 
@@ -245,15 +233,15 @@
     if (S.dd === open) return;
     S.dd = open;
     if (open) renderOrigins();
-    $('#frombar').classList.toggle('open', open);
+    const fbar = $('#frombar');
+    fbar.classList.toggle('open', open);
     $('#origins').classList.toggle('ddopen', open);
     $('#fromBtn').setAttribute('aria-expanded', String(open));
-    $('#ddBtn').setAttribute('aria-expanded', String(open));
     $('#fbGallery').setAttribute('aria-hidden', String(!open));
     $('#fbClose').tabIndex = open ? 0 : -1;
     if (open) {
       const cur = $(`[data-origin="${S.o}"]`, $('#origin-panel'));
-      setTimeout(() => { if (cur) { cur.focus({ preventScroll: true }); cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } }, 60);
+      setTimeout(() => { if (cur) cur.focus({ preventScroll: true }); }, 60);
     }
   };
 
@@ -265,12 +253,26 @@
     const want = now ? y > point - HYST : y > point + 8;
     if (want !== now) el.classList.toggle('stuck', want);
   };
+  let lastY = window.scrollY;
   const onScroll = () => {
-    // trip header sits under the (non-sticky) nav: it sticks once the nav has scrolled away, then shrinks a little later
-    if (isBooking()) { const bh = $('#bkHead'); if (bh) stickAt(bh, true, $('#topbar').offsetHeight + 40); return; }
+    const fab = $('.fab'), y = window.scrollY;
+    if (fab && Math.abs(y - lastY) > 6) { fab.classList.toggle('hide', y > lastY && y > 120); lastY = y; }
+    if (isBooking()) { const bh = $('#bkHead'); if (bh) bh.classList.toggle('scrolled', window.scrollY > $('#topbar').offsetHeight); return; } // same size; only the dropdown buttons hide once pinned
     const el = $('#origins'), h = $('.hero');
-    if (el && h) stickAt(el, true, h.offsetTop + h.offsetHeight);
+    // the bar scrolls away with the page; a compact copy pins to the top only once the bar is fully off screen
+    if (el && h && !S.dd) stickAt(el, true, el.offsetTop + el.offsetHeight);
     S.stuck = el && el.classList.contains('stuck');
+    // past the destination cards: tuck the "Going from" bar away and bring back the main nav, fixed on top
+    const g = $('#grid'), nav = $('#topbar');
+    if (g && nav && !S.dd) {
+      const end = g.offsetTop + g.offsetHeight - 120, on = el.classList.contains('away');
+      const want = on ? window.scrollY > end - 48 : window.scrollY > end;
+      if (want !== on) {
+        el.classList.toggle('away', want);
+        nav.classList.toggle('nav-fixed', want);
+        nav.classList.toggle('over', !want);
+      }
+    }
   };
 
   // Mouse drag-to-scroll on the origin rail (touch uses native swipe)
@@ -293,47 +295,47 @@
     const d = S.details;
     return { first: !!d.first.trim(), last: !!d.last.trim(), email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email.trim()), phone: d.phone.replace(/\D/g, '').length >= 6 };
   };
-  const optsHTML = (r, from, to) => {
+  // The trip page is one simple, numbered flow:
+  // 1 When  2 Boat  3 Where we meet you  4 Extras (optional)  5 Your details  → Send request
+  const step = (n, key, title, hint, body) => `
+        <section class="step" data-sec="${key}">
+          <div class="step-h"><span class="step-n" aria-hidden="true">${n}</span><div><h2 class="step-t">${title}</h2>${hint ? `<p class="step-hint">${hint}</p>` : ''}</div></div>
+          ${body}
+        </section>`;
+  const optsHTML = (r, from, to, part) => {
     const { retPrice } = prices(r);
-    const mark = (on) => on ? 'M5 12l5 5L19 7' : 'M12 5v14M5 12h14';
-    const extras = [
-      { key: 'ret', title: 'Return trip', note: `${to.name} → ${from.name}, any date · 10% off`, price: `+${retPrice} €`, on: S.ret },
-      { key: 'swim', title: 'Swim stop on the way', note: 'About 45 minutes in a quiet bay', price: `+${SWIM_PRICE} €`, on: S.swim }
-    ];
     const ok = detailsOk(), d = S.details;
     const input = (k, label, type, auto, extra = '') => `
-            <label class="field muted">${label}<input type="${type}" autocomplete="${auto}" data-detail="${k}" value="${esc(d[k])}"${S.tried && !ok[k] ? ' aria-invalid="true"' : ''}${extra}></label>`;
-    const body = {
-      when: `
+            <label class="field">${label}<input type="${type}" autocomplete="${auto}" data-detail="${k}" value="${esc(d[k])}"${S.tried && !ok[k] ? ' aria-invalid="true"' : ''}${extra}></label>`;
+    const check = (on) => `<span class="ck${on ? ' on' : ''}" aria-hidden="true">${on ? CHECK : ''}</span>`;
+    if (part === 'a') return `
+      <div id="bkOptsA">
+        ${step(1, 'when', 'When do you want to go?', '', `
           <div class="dt-grid">
-            <div class="field muted"><span>Date</span><button type="button" class="pick-btn" data-pick="date">${fmtDate(S.date)}</button></div>
-            <div class="field muted"><span>Time</span><button type="button" class="pick-btn" data-pick="time">${S.time}</button></div>
-          </div>`,
-      boat: `
-          <div class="dgrid boatlist" role="radiogroup" aria-label="Boat">
+            <div class="field"><span>Date</span><button type="button" class="pick-btn" data-pick="date">${fmtDate(S.date)}</button></div>
+            <div class="field"><span>Time</span><button type="button" class="pick-btn" data-pick="time">${S.time}</button></div>
+          </div>`)}
+        ${step(2, 'boat', 'Which boat?', 'Every boat comes with a skipper. The price is for the whole boat.', `
+          <div class="choice-list" role="radiogroup" aria-label="Boat">
             ${BOATS.map((b, j) => { const on = j === S.tier; return `
-            <button type="button" class="box dest boatcard t-${b.tier}" role="radio" data-tier="${j}" aria-checked="${on}" aria-pressed="${on}">
-              <span class="cmedia"><img class="cimg" src="${b.img}" alt="${esc(b.model)}">${b.tier === 'lux' ? '<span class="lux-badge">✦ Premium</span>' : ''}</span>
-              <span class="cbody">
-                <span class="cfrom">${esc(b.model)}</span>
-                <span class="t-h3">${b.name}</span>
-                <span class="cmore"><span><span class="br-tags">${b.why.map((w) => `<span class="tag">${esc(w)}</span>`).join('')}</span></span></span>
-              </span>
-              <span class="cfoot"><span class="ctime">${on ? 'Selected' : esc(b.why[0])}</span><span class="btn btn-sm">${r[1] + b.add} €${on ? CHECK : ARROW()}</span></span>
+            <button type="button" class="opt choice" role="radio" data-tier="${j}" aria-checked="${on}" aria-pressed="${on}">
+              <img src="${b.img}" alt="">
+              <span class="choice-t"><b>${b.name}</b><span class="choice-tags">${b.why.map((w) => `<span class="tag">${esc(w)}</span>`).join('')}</span></span>
+              <span class="choice-p">${r[1] + b.add} €</span>
+              <span class="radio${on ? ' on' : ''}" aria-hidden="true"></span>
             </button>`; }).join('')}
-          </div>`,
-      extras: `
-          <div class="optlist">
-            ${extras.map((x) => `
-            <button type="button" class="opt extraopt" data-extra="${x.key}" aria-pressed="${x.on}">
-              <span style="flex:1"><span class="opt-t">${x.title}</span><span class="muted t-14">${esc(x.note)}</span></span>
-              <span class="opt-p">${x.price}</span>
-              <span class="mark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="${mark(x.on)}"/></svg></span>
-            </button>`).join('')}
-          </div>`,
-      details: `
+          </div>`)}
+      </div>`;
+    return `
+      <div id="bkOptsB">
+        ${step(4, 'extras', 'Anything extra?', 'Optional. Tick what you’d like.', `
+          <div class="choice-list">
+            <button type="button" class="opt choice extra" data-extra="ret" aria-pressed="${S.ret}">${check(S.ret)}<span class="choice-t"><b>Return trip</b><span class="muted">${esc(to.name)} → ${esc(from.name)}, any date · 10% off</span></span><span class="choice-p">+${retPrice} €</span></button>
+            <button type="button" class="opt choice extra" data-extra="swim" aria-pressed="${S.swim}">${check(S.swim)}<span class="choice-t"><b>Swim stop on the way</b><span class="muted">About 45 minutes in a quiet bay</span></span><span class="choice-p">+${SWIM_PRICE} €</span></button>
+          </div>`)}
+        ${step(5, 'details', 'Your details', 'So we can confirm your trip by email and WhatsApp.', `
           <div class="det-grid">${input('first', 'First name', 'text', 'given-name')}${input('last', 'Last name', 'text', 'family-name')}${input('email', 'Email', 'email', 'email')}
-            <div class="field muted"><label for="bkPhone">Phone (WhatsApp)</label>
+            <div class="field"><label for="bkPhone">Phone (WhatsApp)</label>
               <div class="phone${S.tried && !ok.phone ? ' bad' : ''}">
                 <span class="phone-cc">
                   <span class="phone-flag" aria-hidden="true">${flag(d.cc)}</span><span>${dial(d.cc)}</span>
@@ -344,23 +346,14 @@
               </div>
             </div>
           </div>
-          <p class="muted t-14 det-help">After you send the request, we reply by email and WhatsApp with the confirmation and your skipper’s number.</p>
-          ${S.tried && !Object.values(ok).every(Boolean) ? '<p class="det-err" role="alert">Add your details so we can confirm your request.</p>' : ''}`,
-      note: (S.noteOpen || S.note.trim()) ? `
-          <label class="note-l" for="bkNote">Anything we should know?</label>
-          <textarea class="note" id="bkNote" data-note rows="4" placeholder="Flight number, luggage, kids, anything the skipper should know">${esc(S.note)}</textarea>`
-        : `<button type="button" class="btn note-btn" data-note-open><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Have something to say? Add a note</button>`
-    };
-    const sec = (key, title) => `
-        <section class="bk-row" data-sec="${key}">
-          ${title ? `<h2 class="bk-label">${title}</h2>` : ''}
-          ${body[key]}
-        </section>`;
-    return `
-      <div class="bk-opts" id="bkOpts">
-        ${sec('when', 'When')}${sec('boat', 'Boat')}${sec('extras', 'Extras')}${sec('details', 'Your details')}${sec('note', '')}
+          ${S.tried && !Object.values(ok).every(Boolean) ? '<p class="det-err" role="alert">Please fill in the fields marked in red.</p>' : ''}
+          ${(S.noteOpen || S.note.trim()) ? `
+          <label class="field" for="bkNote">Message for the skipper (optional)
+            <textarea class="note" id="bkNote" data-note rows="3" placeholder="Flight number, luggage, kids…">${esc(S.note)}</textarea></label>`
+          : '<button type="button" class="linkbtn" data-note-open>+ Add a message for the skipper</button>'}`)}
       </div>`;
   };
+
 
   const barHTML = (r) => {
     const T = BOATS[S.tier];
@@ -369,6 +362,7 @@
     return `
       <div class="bk-bar" id="bkBar">
         <div class="wrap bk-bar-in">
+          <img class="bk-boat" src="${T.img}" alt="${esc(T.name)} boat, ${esc(T.model)}">
           <span class="bk-sum"><span class="t-16 fw500">${T.name} boat${whenTxt}</span><span class="t-14 muted">Nothing is booked yet. We check availability and confirm by email and WhatsApp.</span></span>
           <div class="bk-act">
             <span class="bk-total" aria-live="polite">${prices(r).total} €</span>
@@ -378,71 +372,143 @@
       </div>`;
   };
 
-  // Trip map: colour map with the sea route, start pin, destination pin and a boat sailing it
-  let bkMap = null;
-  const initHero = () => {
-    if (bkMap) { bkMap.remove(); bkMap = null; }
-    const el = $('#bkMap'); if (!el || !window.maplibregl) return;
-    const path = seaRoute(S.o, S.m), key = `${S.o}-${S.m}`;
-    const mobile = window.matchMedia('(max-width: 640px)').matches;
-    mapStyle().then((st) => {
-      if (!el.isConnected || `${S.o}-${S.m}` !== key) return;
-      bkMap = makeMap(el, path, st, { interactive: true, padding: mobile ? 32 : 64, boat: true, attribution: true });
-    });
-  };
+
 
   // Last screen: confirmation of the request
   const renderConfirm = () => {
-    const from = D[S.o], to = D[S.m], r = route(from, to), T = BOATS[S.tier], { retPrice, total } = prices(r), d = S.details;
+    const from = D[S.o], to = D[S.m], r = route(from, to), T = BOATS[S.tier], { total } = prices(r), d = S.details;
     const row = (k, v) => `<div class="cf-row"><dt>${k}</dt><dd>${v}</dd></div>`;
-    const extras = [S.ret && `Return trip (+${retPrice} €)`, S.swim && `Swim stop (+${SWIM_PRICE} €)`].filter(Boolean).join(', ') || 'None';
     $('#booking').innerHTML = `
       <section class="cf-band fade" aria-labelledby="cfTitle"><div class="wrap cf">
         <span class="cf-ok" aria-hidden="true"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span>
         <h1 class="cf-title" id="cfTitle" tabindex="-1">Request sent</h1>
-        <p class="cf-sub">Thanks, ${esc(d.first)}. We’ll confirm your transfer by email and WhatsApp.</p>
-        <div class="cf-grid">
-          <div class="box cf-card">
-            <div class="cf-route">
-              <span class="bt-p"><img src="${from.img}" alt=""><span class="bt-txt"><span class="bt-l">From</span><span>${esc(from.name)}</span></span></span>
-              <span class="bt-p bt-to"><img src="${to.img}" alt=""><span class="bt-txt"><span class="bt-l">To</span><span>${esc(to.name)}</span></span></span>
-            </div>
-            <dl class="cf-list">
-              ${row('Date', `${fmtDate(S.date, true)} · ${S.time}`)}
-              ${row('Trip', `${fmt(r[0])} by private boat`)}
-              ${row('Boat', `${T.name} · ${esc(T.model)}`)}
-              ${row('Extras', extras)}
-              ${row('Name', `${esc(d.first)} ${esc(d.last)}`)}
-              ${row('Contact', `${esc(d.email)} · ${dial(d.cc)} ${esc(d.phone)}`)}
-              ${S.note.trim() ? row('Note', esc(S.note.trim())) : ''}
-            </dl>
-            <div class="cf-total"><span>Total per boat</span><span class="bk-total">${total} €</span></div>
-          </div>
-          <div class="cf-next">
-            <div class="box cf-pay">
-              <h2 class="cf-pay-h">Payment</h2>
-              <p class="cf-pay-now"><b>Nothing to pay now.</b> You pay once we’ve confirmed your transfer.</p>
-              <dl class="cf-list">
-                ${row('Total', `${total} € per boat`)}
-                ${row('How', '[Payment methods, e.g. card link or cash to the skipper]')}
-                ${row('When', '[When payment is due, e.g. deposit after confirmation, rest on board]')}
-                ${row('Cancel', '[Cancellation and weather policy]')}
-              </dl>
-            </div>
-            <h2 class="bk-label">What happens next</h2>
-            <ol class="cf-steps">
-              <li><b>We check the boat and skipper</b><span class="muted">for your date and time.</span></li>
-              <li><b>You get a confirmation</b><span class="muted">by email and WhatsApp, with the meeting point.</span></li>
-              <li><b>Your skipper meets you at the pier</b><span class="muted">${esc(from.pier)}.</span></li>
-            </ol>
-            <button type="button" class="gobtn cf-home" data-home>Back to Sea Transfers</button>
-          </div>
+        <p class="cf-sub">Thanks, ${esc(d.first)}. We’ll confirm by email and WhatsApp.</p>
+        <div class="box cf-card">
+          <p class="cf-route-t">${esc(from.name)} → ${esc(to.name)}</p>
+          <dl class="cf-list">
+            ${row('When', `${fmtDate(S.date)} · ${S.time}`)}
+            ${row('Boat', T.name)}
+            ${S.flight ? row('Flight', `${esc(S.flight.code)} · ${S.flight.dir === 'arr' ? 'lands' : 'leaves'} ${S.flight.time}`) : ''}
+            ${S.pick || S.drop ? row('Pins', [S.pick && 'pickup', S.drop && 'drop-off'].filter(Boolean).join(' and ') + ' set on the map') : ''}
+            ${row('Total', `${total} € per boat`)}
+          </dl>
+          <p class="cf-pay-now"><b>Nothing to pay now.</b> You pay once we’ve confirmed your transfer.</p>
         </div>
+        <button type="button" class="gobtn cf-home" data-home>Back to Sea Transfers</button>
       </div></section>`;
-    if (bkMap) { bkMap.remove(); bkMap = null; }
+    dropBkMaps();
     $('#topbar').classList.add('on-blue');
     setTimeout(() => { const t = $('#cfTitle'); if (t) t.focus({ preventScroll: true }); }, 50);
   };
+
+  // ---------- Pickup & drop-off: two separate maps, one per end of the trip ----------
+  // Default is the pier. Drag the pin or tap the map to choose the exact spot (a beach, a hotel jetty, a yacht).
+  const PIN_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  const PINS = { pick: { label: 'Pickup', verb: 'pick you up' }, drop: { label: 'Drop-off', verb: 'drop you off' } };
+  const pinPort = (k) => (k === 'pick' ? D[S.o] : D[S.m]);
+  const pierLL = (k) => { const p = seaRoute(S.o, S.m); const e = k === 'pick' ? p[0] : p[p.length - 1]; return [e[1], e[0]]; };
+  // Meeting points: two maps in containers (pickup, drop-off), each with a pin on the pier that can be dragged
+  const meetItem = (k) => `
+      <div class="meet-box" data-pinbox="${k}">
+        <div class="pinbox-map" id="pinMap-${k}" role="application" aria-label="${PINS[k].label} in ${esc(pinPort(k).name)}: drag the pin or tap the map to choose the spot"></div>
+        <span class="meet-tag">${PINS[k].label} · ${esc(pinPort(k).name)}</span>
+      </div>`;
+  let bkMaps = [];
+  const pinMarkers = {};
+  const dropBkMaps = () => { bkMaps.forEach((m) => m.remove()); bkMaps = []; Object.keys(pinMarkers).forEach((k) => delete pinMarkers[k]); };
+  const pinEl = (k) => { const e = document.createElement('div'); e.className = `pinm pinm-${k}`; e.innerHTML = `${PIN_SVG}<span>${PINS[k].label}</span>`; return e; };
+  const buildPinMap = (k, st) => {
+    const el = $(`#pinMap-${k}`); if (!el) return;
+    const mobile = window.matchMedia('(max-width: 640px)').matches, at = S[k] || pierLL(k);
+    const map = new maplibregl.Map({ container: el, style: structuredClone(st), center: at, zoom: 14.5, attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false, touchPitch: false });
+    map.scrollZoom.disable(); map.touchZoomRotate.disableRotation(); if (mobile) map.dragPan.disable();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    const mk = new maplibregl.Marker({ element: pinEl(k), anchor: 'bottom', draggable: true }).setLngLat(at).addTo(map);
+    mk.on('dragend', () => { const p = mk.getLngLat(); S[k] = [p.lng, p.lat]; });
+    map.on('click', (e) => { mk.setLngLat(e.lngLat); S[k] = [e.lngLat.lng, e.lngLat.lat]; });
+    pinMarkers[k] = { map, mk };
+    bkMaps.push(map);
+  };
+  const initHero = () => {
+    dropBkMaps();
+    if (!window.maplibregl || !$('#pinMap-pick')) return;
+    const key = `${S.o}-${S.m}`;
+    const mobile = window.matchMedia('(max-width: 640px)').matches;
+    mapStyle().then((st) => {
+      if (`${S.o}-${S.m}` !== key || !isBooking()) return;
+      const hero = $('#bkMap');
+      if (hero) bkMaps.push(makeMap(hero, seaRoute(S.o, S.m), st, { interactive: true, padding: mobile ? 32 : 64, boat: true, attribution: true }));
+      buildPinMap('pick', st); buildPinMap('drop', st);
+    });
+  };
+
+  // ---------- Flight number: fills date, time and the airport end of the trip ----------
+  // DEMO ONLY: lookupFlight() makes up a plausible schedule from the flight number. Replace it with a real
+  // flight-status API (e.g. AeroDataBox, FlightAware) before going live.
+  const AIRLINES = { EZY: 'easyJet', U2: 'easyJet', RYR: 'Ryanair', FR: 'Ryanair', CTN: 'Croatia Airlines', OU: 'Croatia Airlines', BAW: 'British Airways', BA: 'British Airways', DLH: 'Lufthansa', LH: 'Lufthansa', EWG: 'Eurowings', EW: 'Eurowings', AUA: 'Austrian', OS: 'Austrian', SWR: 'Swiss', LX: 'Swiss', KLM: 'KLM', KL: 'KLM', AFR: 'Air France', AF: 'Air France', WZZ: 'Wizz Air', W6: 'Wizz Air', VLG: 'Vueling', VY: 'Vueling', TRA: 'Transavia', HV: 'Transavia', EXS: 'Jet2', LS: 'Jet2', SAS: 'SAS', SK: 'SAS', NAX: 'Norwegian', DY: 'Norwegian' };
+  const CITIES = ['London', 'Manchester', 'Frankfurt', 'Munich', 'Vienna', 'Zurich', 'Amsterdam', 'Paris', 'Oslo', 'Stockholm', 'Warsaw', 'Zagreb', 'Rome', 'Dublin', 'Brussels', 'Copenhagen'];
+  const lookupFlight = (raw) => {
+    const code = raw.toUpperCase().replace(/\s+/g, '');
+    const m = /^([A-Z]{3}|[A-Z0-9]{2})(\d{1,4}[A-Z]?)$/.exec(code);
+    if (!m) return null;
+    let hsh = 0; for (const ch of code) hsh = (hsh * 31 + ch.charCodeAt(0)) >>> 0;
+    const mins = 7 * 60 + (hsh % (14 * 12)) * 5; // somewhere between 07:00 and 20:55
+    return { code: `${m[1]} ${m[2]}`, airline: AIRLINES[m[1]] || 'Airline', city: CITIES[hsh % CITIES.length], time: `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`, mins };
+  };
+  // round to the 30-minute slots of the time picker, keep within 06:00–21:00
+  const toSlot = (m) => { const s = Math.min(Math.max(Math.ceil(m / 30) * 30, 6 * 60), 21 * 60); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+  let flFound = null;
+  const openFlight = (pop) => {
+    // pop = small popup bottom-right (home); otherwise fullscreen (trip page)
+    $('#flight').classList.toggle('pop', !!pop);
+    flFound = null; $('#flRes').innerHTML = ''; $('#flErr').hidden = true; $('#flGo').textContent = 'Find flight';
+    $('#flInput').value = S.flight ? S.flight.code : '';
+    $('#flight').hidden = false; if (!pop) document.body.style.overflow = 'hidden';
+    setTimeout(() => $('#flInput').focus(), 30);
+  };
+  const closeFlight = () => {
+    $('#flight').hidden = true; document.body.style.overflow = '';
+    const b = $('.fb-fl'); if (b && !isBooking()) b.focus({ preventScroll: true });
+  };
+  const findFlight = () => {
+    const f = lookupFlight($('#flInput').value);
+    $('#flErr').hidden = !!f;
+    if (!f) { flFound = null; $('#flRes').innerHTML = ''; $('#flGo').textContent = 'Find flight'; return; }
+    // Going to the airport = departing flight; otherwise the flight lands at Split Airport
+    const dir = isBooking() && S.m === 0 ? 'dep' : 'arr';
+    const pickup = dir === 'arr' ? toSlot(f.mins + 45) : toSlot(f.mins - 120 - route(D[S.o], D[0])[0]);
+    flFound = { ...f, dir, pickup };
+    $('#flRes').innerHTML = `
+      <div class="box fl-card">
+        <span class="fl-code">${esc(f.code)} <span class="muted">${esc(f.airline)}</span></span>
+        <span class="fl-route">${dir === 'arr' ? `${esc(f.city)} → Split Airport` : `Split Airport → ${esc(f.city)}`}</span>
+        <dl class="cf-list">
+          <div class="cf-row"><dt>${dir === 'arr' ? 'Lands' : 'Takes off'}</dt><dd>${fmtDate(S.date)} · ${f.time}</dd></div>
+          <div class="cf-row"><dt>Your boat</dt><dd>${dir === 'arr' ? `${pickup} from the airport pier, 45 min after landing` : `${pickup}, in time for check-in`}</dd></div>
+        </dl>
+        <p class="fl-demo">Demo: flight times are simulated.</p>
+      </div>`;
+    $('#flGo').textContent = 'Use this flight';
+  };
+  const useFlight = () => {
+    const f = flFound;
+    S.flight = { code: f.code, city: f.city, time: f.time, dir: f.dir };
+    S.time = f.pickup;
+    $('#flight').hidden = true; document.body.style.overflow = '';
+    if (!isBooking()) { // home: start from Split Airport, then pick a destination
+      S.o = 0; renderFrom(); renderCards(); toGrid();
+      return;
+    }
+    if (f.dir === 'arr' && S.o !== 0) { S.o = 0; if (S.m === 0) S.m = 2; history.replaceState({ m: S.m, o: S.o }, ''); }
+    const y = window.scrollY; renderBooking(); window.scrollTo(0, y);
+    const b = $('[data-fl-open]'); if (b) b.focus({ preventScroll: true });
+  };
+  $('#flight').addEventListener('click', (e) => {
+    if (e.target.closest('[data-fl-close]')) return closeFlight();
+    if (e.target.closest('[data-fl-go]')) return flFound ? useFlight() : findFlight();
+  });
+  $('#flForm').addEventListener('submit', (e) => { e.preventDefault(); flFound ? useFlight() : findFlight(); });
+  $('#flInput').addEventListener('input', () => { if (flFound) { flFound = null; $('#flRes').innerHTML = ''; $('#flGo').textContent = 'Find flight'; } });
 
   const renderBooking = () => {
     const from = D[S.o], to = D[S.m], r = route(from, to);
@@ -450,19 +516,35 @@
       <!-- Sticky trip header, built like the home page's "Going from" bar -->
       <header class="bk-head" id="bkHead">
         <div class="wrap bk-head-in">
-          <h1 class="fromname bk-title">
-            <span class="bt-p"><img src="${from.img}" alt=""><span class="bt-txt"><span class="bt-l">From</span><span>${esc(from.name)}</span></span></span>
-            <button type="button" class="bk-swap" data-swap aria-label="Swap start and destination"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 13l-4 4 4 4"/></svg></button>
-            <span class="bt-p bt-to"><img src="${to.img}" alt=""><span class="bt-txt"><span class="bt-l">To</span><span>${esc(to.name)}</span></span><span class="ctime bk-time">${hm(r[0])}</span></span>
-          </h1>
+          <!-- Same search-style field as the home page: From | To, each with photo, label, port and Change -->
+          <div class="bk-pickwrap">
+            <h1 class="sr-only">${esc(from.name)} to ${esc(to.name)}</h1>
+            <div class="fb-search bk-search">
+              <button type="button" class="fb-seg" data-pm="from" aria-haspopup="listbox" aria-expanded="false" aria-label="From ${esc(from.name)}. Change starting point">
+                <span class="fthumb"><img src="${from.img}" alt=""></span>
+                <span class="fb-seg-t"><span class="fb-seg-l">From</span><span class="fromname">${esc(from.name)}</span></span>
+                <span class="fb-seg-cta" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <button type="button" class="fb-seg" data-pm="to" aria-haspopup="listbox" aria-expanded="false" aria-label="To ${esc(to.name)}. Change destination">
+                <span class="fthumb"><img src="${to.img}" alt=""></span>
+                <span class="fb-seg-t"><span class="fb-seg-l">To <span class="fb-opt">${hm(r[0])} by boat</span></span><span class="fromname">${esc(to.name)}</span></span>
+                <span class="fb-seg-cta" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+              </button>
+              <button type="button" class="bk-swap" data-swap aria-label="Swap start and destination"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 13l-4 4 4 4"/></svg></button>
+            </div>
+            <ul class="pm" id="pm" role="listbox" hidden></ul>
+          </div>
         </div>
       </header>
-      <!-- Route map, edge to edge -->
-      <section class="bk-mapsec">
-        <div class="bk-hero" id="bkHero"><div class="bk-map" id="bkMap" role="img" aria-label="${esc(`Map of the sea route from ${from.name} to ${to.name}`)}"></div></div>
+      <!-- Hero: animated route map (the line draws in, then a boat sails it) -->
+      <section class="wrap bk-mapsec">
+        <div class="bk-hero"><div class="bk-map" id="bkMap" role="img" aria-label="${esc(`Map of the sea route from ${from.name} to ${to.name}`)}"></div></div>
       </section>
       <section class="wrap bk-main">
-        ${optsHTML(r, from, to)}
+        ${optsHTML(r, from, to, 'a')}
+        ${step(3, 'meet', 'Where do we meet you?', 'At the pier. To be picked up or dropped off somewhere else, drag the pin.', `
+          <div class="meet">${meetItem('pick')}${meetItem('drop')}</div>`)}
+        ${optsHTML(r, from, to, 'b')}
       </section>
       ${barHTML(r)}`;
     initHero();
@@ -472,9 +554,10 @@
   const updateBooking = (focusSel) => {
     const from = D[S.o], to = D[S.m], r = route(from, to);
     const swap = (sel, html) => { const t = document.createElement('div'); t.innerHTML = html.trim(); $(sel).replaceWith(t.firstElementChild); };
-    swap('#bkOpts', optsHTML(r, from, to));
+    swap('#bkOptsA', optsHTML(r, from, to, 'a'));
+    swap('#bkOptsB', optsHTML(r, from, to, 'b'));
     swap('#bkBar', barHTML(r));
-    if (focusSel) { const f = $(focusSel, $('#booking')); if (f) f.focus(); }
+    if (focusSel) { const f = $(focusSel, $('#booking')); if (f) f.focus({ preventScroll: true }); }
   };
 
   // ---------- View switching ----------
@@ -482,14 +565,15 @@
     const bk = isBooking();
     $('#home').hidden = bk;
     $('#booking').hidden = !bk;
+    $('#topbar').classList.remove('nav-fixed'); const og = $('#origins'); if (og) og.classList.remove('away');
     $('#topbar').classList.toggle('over', !bk); // white nav bar with the logo on the trip page
     $('#topbar').classList.remove('on-blue');
-    if (!bk && bkMap) { bkMap.remove(); bkMap = null; }
+    if (!bk) dropBkMaps();
     if (bk) renderBooking(); else { renderFrom(); renderCards(); }
   };
 
   const goHome = () => { S.m = null; showView(); jumpTop(); };
-  const openDest = (k) => { S.m = k; S.tier = 0; S.ret = false; S.swim = false; S.tried = false; S.sent = false; setDd(false); history.pushState({ m: k, o: S.o }, ''); showView(); jumpTop(); };
+  const openDest = (k) => { S.m = k; S.tier = 0; S.ret = false; S.swim = false; S.pick = null; S.drop = null; S.pinEdit = null; S.tried = false; S.sent = false; setDd(false); history.pushState({ m: k, o: S.o }, ''); showView(); jumpTop(); };
   window.addEventListener('popstate', (e) => { const was = isBooking(); S.m = e.state && e.state.m != null ? e.state.m : null; showView(); if (was && !isBooking()) { jumpTop(); toGrid(); } else jumpTop(); });
 
   // ---------- Language dropdown ----------
@@ -518,6 +602,37 @@
     else if (e.key === 'Tab') setLangOpen(false);
   });
   document.addEventListener('click', (e) => { if (!langList.hidden && !e.target.closest('#lang')) setLangOpen(false); });
+
+  // ---------- Trip page: change start or destination from the header ----------
+  let pmMode = null;
+  const closePM = (focus) => {
+    const pm = $('#pm'); if (!pm || pm.hidden) return;
+    pm.hidden = true; document.querySelectorAll('[data-pm]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    if (focus) { const b = $(`[data-pm="${pmMode}"]`); if (b) b.focus(); }
+    pmMode = null;
+  };
+  const openPM = (mode) => {
+    const pm = $('#pm'); if (!pm) return;
+    if (pmMode === mode) return closePM(true);
+    pmMode = mode;
+    const cur = mode === 'from' ? S.o : S.m, other = mode === 'from' ? S.m : S.o;
+    pm.className = `pm pm-${mode}`;
+    pm.setAttribute('aria-label', mode === 'from' ? 'Starting point' : 'Destination');
+    pm.innerHTML = D.map((x, k) => k === other ? '' : `
+      <li role="option" aria-selected="${k === cur}"><button type="button" class="pm-row" data-pm-pick="${k}">
+        <img src="${x.img}" alt=""><span class="pm-txt"><b>${esc(x.name)}</b><span class="muted">${esc(x.pier)}</span></span>${k === cur ? CHECK : ''}
+      </button></li>`).join('');
+    pm.hidden = false;
+    document.querySelectorAll('[data-pm]').forEach((b) => b.setAttribute('aria-expanded', String(b.dataset.pm === mode)));
+    const sel = pm.querySelector('[aria-selected="true"] button') || pm.querySelector('button'); if (sel) sel.focus();
+  };
+  const pickPM = (k, row) => {
+    const mode = pmMode; closePM(false);
+    if (mode === 'from') S.o = k; else S.m = k;
+    history.replaceState({ m: S.m, o: S.o }, '');
+    const y = window.scrollY; renderBooking(); window.scrollTo(0, y);
+    const b = $(`[data-pm="${mode}"]`); if (b) b.focus({ preventScroll: true });
+  };
 
   // ---------- Fullscreen date & time picker ----------
   const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
@@ -581,12 +696,25 @@
     if (t.closest('#fbClose')) { setDd(false); $('#fromBtn').focus(); return; }
     const pop = t.closest('[data-pop]');
     if (pop) { const [a, b] = pop.dataset.pop.split('-').map(Number); S.o = a; openDest(b); return; }
-    if (t.closest('#goBtn')) { toGrid(); return;
-    }
     const o = t.closest('[data-origin]');
-    if (o) { if (justDragged) { justDragged = false; return; } const k = +o.dataset.origin; setDd(false); if (k !== S.o) { S.o = k; renderFrom(); renderCards(); } $('#fromBtn').focus({ preventScroll: true }); return; }
+    if (o) {
+      if (justDragged) { justDragged = false; return; }
+      const k = +o.dataset.origin;
+      // pick: close and show the new port straight away (no animation)
+      setTimeout(() => {
+        setDd(false);
+        if (k !== S.o) { S.o = k; renderFrom(); renderCards(); }
+        $('#fromBtn').focus({ preventScroll: true });
+      }, 0);
+      return;
+    }
     const d = t.closest('[data-dest]');
     if (d) { openDest(+d.dataset.dest); return; }
+    const pmb = t.closest('[data-pm]');
+    if (pmb) { openPM(pmb.dataset.pm); return; }
+    const pmp = t.closest('[data-pm-pick]');
+    if (pmp) { pickPM(+pmp.dataset.pmPick, pmp); return; }
+    if (pmMode && !t.closest('#pm')) closePM(false);
     if (t.closest('[data-swap]')) {
       [S.o, S.m] = [S.m, S.o];
       history.replaceState({ m: S.m, o: S.o }, '');
@@ -605,6 +733,8 @@
       S.sent = true; renderConfirm(); jumpTop(); return;
     }
     if (t.closest('[data-note-open]')) { S.noteOpen = true; updateBooking('#bkNote'); return; }
+    const flo = t.closest('[data-fl-open]');
+    if (flo) { openFlight(flo.hasAttribute('data-fl-pop')); return; }
     const pick = t.closest('[data-pick]');
     if (pick) { openPicker(pick.dataset.pick, pick.dataset.pick); return; }
     const tier = t.closest('[data-tier]');
@@ -626,6 +756,8 @@
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (!$('#picker').hidden) { closePicker(); return; }
+    if (!$('#flight').hidden) { closeFlight(); return; }
+    if (pmMode) { closePM(true); return; }
     if (S.dd) { setDd(false); $('#fromBtn').focus(); }
   });
   const r = rail();
@@ -664,7 +796,7 @@
     why.addEventListener('focusin', () => pause(true));
     why.addEventListener('focusout', () => pause(false));
     // Only run while on screen
-    new IntersectionObserver(([en]) => why.classList.toggle('offscreen', !en.isIntersecting)).observe(why);
+    new IntersectionObserver(([en]) => why.classList.toggle('offscreen', !en.isIntersecting)).observe(why); // (no longer on the page)
   }
 
   // ---------- Hero: one benefit at a time ----------
@@ -686,8 +818,23 @@
     }, 2600);
   }
 
+  // ---------- Office map: built when it scrolls into view ----------
+  const OFFICE = [16.4416, 43.1721]; // Riva 13, Hvar (approx.)
+  const officeEl = $('#officeMap');
+  if (officeEl && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([en]) => {
+      if (!en.isIntersecting || !window.maplibregl) return;
+      io.disconnect();
+      mapStyle().then((st) => {
+        const m = new maplibregl.Map({ container: officeEl, style: structuredClone(st), center: OFFICE, zoom: 15.5, interactive: false, attributionControl: { compact: true } });
+        const pin = document.createElement('div'); pin.className = 'office-pin'; pin.setAttribute('aria-hidden', 'true');
+        new maplibregl.Marker({ element: pin }).setLngLat(OFFICE).addTo(m);
+      });
+    }, { rootMargin: '200px' });
+    io.observe(officeEl);
+  }
+
   // ---------- Init ----------
   renderHC();
-  renderPop();
   showView();
 })();

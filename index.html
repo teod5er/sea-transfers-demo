@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="">
-<link rel="stylesheet" href="styles.css?v=62">
+<link rel="stylesheet" href="styles.css?v=148">
 </head>
 <body>
 <div class="hc">
@@ -22,6 +22,7 @@
       <span class="wm-by">by Hvar Charter</span>
     </a>
     <div class="nav-r">
+      <a href="#" class="nav-link">About us</a>
       <!-- Language: dropdown, styled like the Back to Hvar Charter button -->
       <div class="lang" id="lang">
         <button type="button" class="btn menubtn lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList" aria-label="Language: English">
@@ -45,6 +46,10 @@
 
   <!-- HERO -->
   <section class="hero">
+    <picture>
+      <source media="(max-width: 640px)" srcset="img/hero-bg-m.jpg">
+      <img class="hero-media" src="img/hero-bg.jpg" alt="" aria-hidden="true">
+    </picture>
     <div class="wrap hero-in">
       <div class="hero-boxes">
       <div class="hero-card rise">
@@ -54,11 +59,6 @@
         <p class="hrot rise" style="animation-delay:.25s" aria-hidden="true"><span class="hcheck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span><span class="hrot-t" id="hrot">No road traffic</span></p>
         <ul class="sr-only"><li>No road traffic</li><li>Leave when you want</li><li>One price per boat</li><li>Luggage on board</li></ul>
       </div>
-      <!-- Most booked routes as chips, in their own container below the hero box (filled by app.js) -->
-      <div class="hero-pop rise" style="animation-delay:.15s">
-        <h2 class="hero-pop-h">Most booked</h2>
-        <ul class="chips" id="popList"></ul>
-      </div>
       </div>
     </div>
   </section>
@@ -66,22 +66,19 @@
   <!-- STARTING POINT: sticky bar. Tapping the port swaps the bar for a gallery of ports. -->
   <div id="origins" class="stickybar">
     <div class="frombar" id="frombar">
+      <!-- One search-style bar: where you leave from | your flight (optional) -->
       <div class="fb-summary wrap" id="fbSummary">
-        <button type="button" class="fb-pick" id="fromBtn" aria-expanded="false" aria-controls="fbGallery">
-          <span class="fthumb"><img id="fromImg" src="img/hvar.jpg" alt=""></span>
-          <span class="from-text">
-            <span class="t-16 muted fw500">Going from</span>
-            <span class="fromname-row">
-              <span class="fromname" id="fromName">Hvar town</span>
-            </span>
-          </span>
-        </button>
-        <button type="button" class="ddbtn" id="ddBtn" aria-label="Change starting point" aria-expanded="false" aria-controls="fbGallery">
-          <span class="ddbtn-t">Change</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <button type="button" class="gobtn" id="goBtn" aria-label="Continue to destinations">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
+        <div class="fb-search">
+          <button type="button" class="fb-seg fb-pick" id="fromBtn" aria-expanded="false" aria-controls="fbGallery">
+            <span class="fthumb"><img id="fromImg" src="img/hvar.jpg" alt=""></span>
+            <span class="fb-seg-t"><span class="fb-seg-l">Going from</span><span class="fromname" id="fromName">Hvar town</span></span>
+            <span class="fb-seg-cta" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <button type="button" class="fb-seg fb-fl" data-fl-open aria-label="Start with your flight number">
+            <span class="fb-plane" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 16l20-6-2-3-7 2-6-6-2 1 3 7-5 1-1-1-1 1z"/><path d="M3 21h18"/></svg></span>
+            <span class="fb-seg-t"><span class="fb-seg-l">Flying in? <span class="fb-opt">optional</span></span><span class="fb-seg-v" id="fbFlightV">Start with your flight number</span></span>
+          </button>
+        </div>
       </div>
       <div class="fb-gallery" id="fbGallery" aria-hidden="true">
         <div class="wrap fb-gal-in">
@@ -97,7 +94,6 @@
 
   <!-- DESTINATIONS -->
   <section id="grid" class="wrap grid-sec">
-    <h2 class="t-16 grid-head"><span id="destCount">7</span> destinations <span class="muted fw400">· prices per boat with a skipper</span></h2>
     <div class="dgrid" id="cards"></div>
   </section>
 
@@ -106,38 +102,65 @@
     <div class="wrap why-in">
       <h2 class="t-h1 reveal">Why travel by sea</h2>
       <p class="muted t-16 reveal why-sub">The fastest way between Split and the islands in summer, without the ferry queue.</p>
-      <div class="box why-frame reveal" id="why" role="region" aria-roledescription="carousel" aria-label="Why travel by sea">
-        <div class="why-slides" aria-live="polite">
-          <div class="why-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 4">
-            <div><h3 class="why-t">Your time, not a timetable</h3><p class="muted why-p">Leave early, late or right after landing. The boat waits for you.</p></div>
-          </div>
-          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="2 of 4" aria-hidden="true">
-            <div><h3 class="why-t">Straight from pier to pier</h3><p class="muted why-p">No bus into Split, no port queue, no drive across the island.</p></div>
-          </div>
-          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="3 of 4" aria-hidden="true">
-            <div><h3 class="why-t">One price for the boat</h3><p class="muted why-p">Skipper and luggage included, however many of you travel.</p></div>
-          </div>
-          <div class="why-slide" role="group" aria-roledescription="slide" aria-label="4 of 4" aria-hidden="true">
-            <div><h3 class="why-t">Local, licensed skippers</h3><p class="muted why-p">[Years] on Hvar. We know every bay, port and weather window.</p></div>
-          </div>
-        </div>
-        <div class="why-nav">
-            <button type="button" class="why-dot" data-why="0" aria-label="Show 1: Your time, not a timetable" aria-current="true"><span class="why-bar"></span></button>
-            <button type="button" class="why-dot" data-why="1" aria-label="Show 2: Straight from pier to pier"><span class="why-bar"></span></button>
-            <button type="button" class="why-dot" data-why="2" aria-label="Show 3: One price for the boat"><span class="why-bar"></span></button>
-            <button type="button" class="why-dot" data-why="3" aria-label="Show 4: Local, licensed skippers"><span class="why-bar"></span></button>
-        </div>
+      <div class="why-grid2 reveal">
+        <div class="why-cell"><h3 class="why-t">Your time, not a timetable</h3><p class="muted why-p">Leave early, late or right after landing. The boat waits for you.</p></div>
+        <div class="why-cell"><h3 class="why-t">Straight from pier to pier</h3><p class="muted why-p">No bus into Split, no port queue, no drive across the island.</p></div>
+        <div class="why-cell"><h3 class="why-t">One price for the boat</h3><p class="muted why-p">Skipper and luggage included, however many of you travel.</p></div>
+        <div class="why-cell"><h3 class="why-t">Local, licensed skippers</h3><p class="muted why-p">[Years] on Hvar. We know every bay, port and weather window.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- HVAR CHARTER CROSS-SELL -->
+  <!-- TESTIMONIALS (sample text: replace with real guest reviews) -->
   <section class="wrap sec">
     <div class="sec-head">
-      <div><h2 class="t-h2">More from Hvar Charter</h2><p class="muted t-16 sec-sub">Already on the water? Make a day of it.</p></div>
-      <a href="#" class="btn">All experiences</a>
+      <div><h2 class="t-h2">What guests say</h2><p class="muted t-16 sec-sub">Reviews from people who took the sea instead of the road.</p></div>
     </div>
-    <div class="cgrid swipe" id="hcCards"></div>
+    <div class="rv-grid">
+        <figure class="box rv reveal">
+          <span class="stars" role="img" aria-label="5 out of 5"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+          <blockquote>“Our skipper was waiting at the airport pier and we were in Hvar before the ferry even left Split. Worth every euro.”</blockquote>
+          <figcaption><b>[Guest name]</b><span class="muted">[Country] · [Google]</span></figcaption>
+        </figure>
+        <figure class="box rv reveal">
+          <span class="stars" role="img" aria-label="5 out of 5"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+          <blockquote>“Easy booking, quick WhatsApp replies and a smooth ride to Vis with all our luggage. We'll book again next summer.”</blockquote>
+          <figcaption><b>[Guest name]</b><span class="muted">[Country] · [TripAdvisor]</span></figcaption>
+        </figure>
+        <figure class="box rv reveal">
+          <span class="stars" role="img" aria-label="5 out of 5"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+          <blockquote>“We added a swim stop on the way to Bol. Best start to a holiday we've had.”</blockquote>
+          <figcaption><b>[Guest name]</b><span class="muted">[Country] · [Google]</span></figcaption>
+        </figure>
+    </div>
+  </section>
+
+  <!-- HVAR CHARTER CROSS-SELL -->
+  <section class="hcband">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <div><h2 class="t-h2">More from Hvar Charter</h2><p class="t-16 sec-sub">Already on the water? Make a day of it.</p></div>
+        <a href="#" class="btn hc-all">All experiences</a>
+      </div>
+      <div class="cgrid swipe" id="hcCards"></div>
+    </div>
+  </section>
+
+  <!-- OFFICE -->
+  <section class="wrap sec">
+    <div class="box office">
+      <div class="office-map" id="officeMap" role="img" aria-label="Map: Hvar Charter office on the Riva in Hvar town"></div>
+      <div class="office-info">
+        <span class="sk-kicker">Visit us</span>
+        <h2 class="t-h2">Hvar Charter office</h2>
+        <p class="office-addr">Riva 13, 21450 Hvar, Croatia<br><span class="muted">On the waterfront, a few steps from the main harbour.</span></p>
+        <dl class="office-list">
+          <div><dt>Phone</dt><dd><a href="tel:+385916129515">+385 91 612 9515</a></dd></div>
+          <div><dt>Open</dt><dd>[Opening hours]</dd></div>
+        </dl>
+        <a class="btn office-btn" href="https://www.google.com/maps/search/?api=1&amp;query=Riva+13%2C+Hvar%2C+Croatia" target="_blank" rel="noopener">Get directions<svg class="go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
   </section>
 
   <!-- FAQ -->
@@ -156,20 +179,34 @@
 <div id="booking" class="fade" hidden></div>
 </main>
 
-<!-- FOOTER -->
-<footer class="foot">
-  <div class="wrap foot-in">
-    <div class="foot-row">
-      <span class="foot-wm">Sea Transfers <span>by Hvar Charter</span></span>
-      <span class="foot-links"><a href="tel:+385916129515">+385 91 612 9515</a><a href="https://wa.me/385916129515">WhatsApp</a><a href="#">Instagram</a></span>
-    </div>
-    <div class="foot-row foot-small">
-      <span>© 2026 Hvar Charter · Riva 13, Hvar</span>
-      <span class="foot-links"><a href="#">Privacy</a><a href="#">Terms</a></span>
-      <span class="foot-map">Maps: <a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></span>
+<!-- Contact buttons, stacked bottom right: Instagram, email, WhatsApp
+     TODO: real email address and Instagram profile (placeholders below) -->
+<div class="fab" aria-label="Contact us">
+  <a class="fab-btn fab-ig" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Hvar Charter on Instagram"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+  <a class="fab-btn fab-mail" href="mailto:info@hvarcharter.com" aria-label="Email us"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>
+  <a class="wa" href="https://wa.me/385916129515" target="_blank" rel="noopener" aria-label="Message us on WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg></a>
+</div>
+</div>
+<!-- Fullscreen flight number entry (app.js): fills date, time and the airport end of the trip -->
+<div class="picker fl" id="flight" role="dialog" aria-modal="true" aria-labelledby="flTitle" hidden>
+  <div class="wrap pk-top">
+    <h2 class="t-h2" id="flTitle">Your flight number</h2>
+    <button type="button" class="btn iconbtn" data-fl-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="pk-body">
+    <form class="wrap fl-in" id="flForm" autocomplete="off">
+      <label class="fl-l" for="flInput">We’ll fill in the date and time for you.</label>
+      <input class="fl-input" id="flInput" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="e.g. EZY8851">
+      <p class="fl-err" id="flErr" role="alert" hidden>That doesn’t look like a flight number. Try something like EZY8851 or OU 652.</p>
+      <div class="fl-res" id="flRes" aria-live="polite"></div>
+    </form>
+  </div>
+  <div class="pk-bar">
+    <div class="wrap pk-bar-in">
+      <span class="pk-sum muted" id="flSum">Flights to and from Split Airport</span>
+      <button type="button" class="gobtn pk-ok" id="flGo" data-fl-go>Find flight</button>
     </div>
   </div>
-</footer>
 </div>
 <!-- Fullscreen date & time picker (app.js) -->
 <div class="picker" id="picker" role="dialog" aria-modal="true" aria-labelledby="pkTitle" hidden>
@@ -202,7 +239,7 @@
   </div>
 </div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin=""></script>
-<script src="routes.js?v=62"></script>
-<script src="app.js?v=62"></script>
+<script src="routes.js?v=148"></script>
+<script src="app.js?v=148"></script>
 </body>
 </html>
