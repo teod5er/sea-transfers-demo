@@ -1268,3 +1268,18 @@ body:has(#booking:not([hidden])) .fab{display:none}
 /* Contact buttons slide out to the right while scrolling down, come back when scrolling up or at the top */
 .fab{transition:transform .35s var(--ease),opacity .25s ease}
 .fab.hide{transform:translateX(calc(100% + 32px));opacity:0;pointer-events:none}
+
+/* Dropdown menus (language, ports): one box only; rows run edge to edge, separated by lines */
+.pm,.lang-list{padding:0;overflow:hidden}
+.pm li + li,.lang-list li + li{border-top:1px solid var(--line)}
+.pm-row{border-radius:0;padding:12px 16px}
+.lang-list li{border-radius:0;height:48px;padding:0 18px}
+
+/* Phones: nav on one line (logo and "About us" no longer wrap) */
+@media (max-width:640px){
+  .wm-text,.nav-link{white-space:nowrap}
+  .wm-text{font-size:16px}
+  .nav-link{font-size:13px;padding:0 4px}
+  .nav-r{gap:6px}
+  .fab{bottom:12px;right:12px}
+}
