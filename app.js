@@ -21,7 +21,7 @@
   const COMFORT_ADD = 100, LUXURY_ADD = 300, SWIM_PRICE = 120;
   const BOATS = [
     { name: 'Standard', model: 'Flyer 828 RIB', perk: 'fast, open-air', add: 0, img: 'img/boat-flyer.jpg', tier: 'std', why: ['Best price', 'Fastest ride', 'Open-air'] },
-    { name: 'Comfort', model: 'Barracuda 730', perk: 'shade, room for bags', add: COMFORT_ADD, img: 'img/boat-barracuda.jpg', tier: 'cmf', why: ['Shade on board', 'Room for luggage', 'Good for families'] },
+    { name: 'Comfort', model: 'Barracuda 730', perk: 'shade, room for bags', add: COMFORT_ADD, img: 'img/boat-barracuda.jpg', tier: 'cmf', badge: 'Most popular choice', why: ['Shade on board', 'Room for luggage', 'Good for families'] },
     { name: 'Luxury', model: 'XP 38', perk: 'lounge and cabin', add: LUXURY_ADD, img: 'img/boat-xp38.jpg', tier: 'lux', why: ['Cabin and lounge', 'Smoothest ride', 'Big groups'] }
   ];
   const HC = [
@@ -306,7 +306,7 @@
     const { retPrice } = prices(r);
     const ok = detailsOk(), d = S.details;
     const input = (k, label, type, auto, extra = '') => `
-            <label class="field">${label}<input type="${type}" autocomplete="${auto}" data-detail="${k}" value="${esc(d[k])}"${S.tried && !ok[k] ? ' aria-invalid="true"' : ''}${extra}></label>`;
+            <label class="field">${label}<input type="${type}" name="${auto}" autocomplete="${auto}" data-detail="${k}" value="${esc(d[k])}"${S.tried && !ok[k] ? ' aria-invalid="true"' : ''}${extra}></label>`;
     const check = (on) => `<span class="ck${on ? ' on' : ''}" aria-hidden="true">${on ? CHECK : ''}</span>`;
     if (part === 'a') return `
       <div id="bkOptsA">
@@ -321,7 +321,7 @@
             <button type="button" class="opt choice" role="radio" data-tier="${j}" aria-checked="${on}" aria-pressed="${on}">
               <img src="${b.img}" alt="">
               <span class="choice-t"><b>${b.name}</b><span class="choice-tags">${b.why.map((w) => `<span class="tag">${esc(w)}</span>`).join('')}</span></span>
-              <span class="choice-p">${r[1] + b.add} €</span>
+              <span class="choice-pw">${b.badge ? `<span class="tag tag-pop">${esc(b.badge)}</span>` : ''}<span class="choice-p">${r[1] + b.add} €</span></span>
               <span class="radio${on ? ' on' : ''}" aria-hidden="true"></span>
             </button>`; }).join('')}
           </div>`)}
@@ -334,18 +334,18 @@
             <button type="button" class="opt choice extra" data-extra="swim" aria-pressed="${S.swim}">${check(S.swim)}<span class="choice-t"><b>Swim stop on the way</b><span class="muted">About 45 minutes in a quiet bay</span></span><span class="choice-p">+${SWIM_PRICE} €</span></button>
           </div>`)}
         ${step(5, 'details', 'Your details', 'So we can confirm your trip by email and WhatsApp.', `
-          <div class="det-grid">${input('first', 'First name', 'text', 'given-name')}${input('last', 'Last name', 'text', 'family-name')}${input('email', 'Email', 'email', 'email')}
+          <form class="det-grid" id="bkDetails" autocomplete="on" novalidate>${input('first', 'First name', 'text', 'given-name')}${input('last', 'Last name', 'text', 'family-name')}${input('email', 'Email', 'email', 'email')}
             <div class="field"><label for="bkPhone">Phone (WhatsApp)</label>
               <div class="phone${S.tried && !ok.phone ? ' bad' : ''}">
                 <span class="phone-cc">
-                  <span class="phone-flag" aria-hidden="true">${flag(d.cc)}</span><span>${dial(d.cc)}</span>
+                  <span class="phone-flag" aria-hidden="true">${flag(d.cc)}</span><span class="phone-dial">${dial(d.cc)}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                  <select data-cc aria-label="Country code">${COUNTRIES.map(([c, n, dl]) => `<option value="${c}"${c === d.cc ? ' selected' : ''}>${flag(c)} ${n} (+${dl})</option>`).join('')}</select>
+                  <select data-cc name="country" autocomplete="country" aria-label="Country code">${COUNTRIES.map(([c, n, dl]) => `<option value="${c}"${c === d.cc ? ' selected' : ''}>${flag(c)} ${n} (+${dl})</option>`).join('')}</select>
                 </span>
-                <input id="bkPhone" type="tel" autocomplete="tel-national" inputmode="tel" data-detail="phone" value="${esc(d.phone)}" placeholder="91 234 5678"${S.tried && !ok.phone ? ' aria-invalid="true"' : ''}>
+                <input id="bkPhone" type="tel" name="tel-national" autocomplete="tel-national" inputmode="tel" data-detail="phone" value="${esc(d.phone)}" placeholder="91 234 5678"${S.tried && !ok.phone ? ' aria-invalid="true"' : ''}>
               </div>
             </div>
-          </div>
+          </form>
           ${S.tried && !Object.values(ok).every(Boolean) ? '<p class="det-err" role="alert">Please fill in the fields marked in red.</p>' : ''}
           ${(S.noteOpen || S.note.trim()) ? `
           <label class="field" for="bkNote">Message for the skipper (optional)
@@ -507,6 +507,8 @@
     if (e.target.closest('[data-fl-close]')) return closeFlight();
     if (e.target.closest('[data-fl-go]')) return flFound ? useFlight() : findFlight();
   });
+  // Enter in the details form = Send request (the form exists so browsers recognise it and offer autofill)
+  document.addEventListener('submit', (e) => { if (e.target.id === 'bkDetails') { e.preventDefault(); const b = $('[data-book]'); if (b) b.click(); } });
   $('#flForm').addEventListener('submit', (e) => { e.preventDefault(); flFound ? useFlight() : findFlight(); });
   $('#flInput').addEventListener('input', () => { if (flFound) { flFound = null; $('#flRes').innerHTML = ''; $('#flGo').textContent = 'Find flight'; } });
 
@@ -748,7 +750,12 @@
     if (e.target.matches('[data-note]')) S.note = e.target.value;
     if (e.target.matches('[data-detail]')) { S.details[e.target.dataset.detail] = e.target.value; if (S.tried) e.target.toggleAttribute('aria-invalid', !detailsOk()[e.target.dataset.detail]); }
   });
-  document.addEventListener('change', (e) => { if (e.target.matches('[data-cc]')) { S.details.cc = e.target.value; updateBooking('[data-cc]'); } });
+  // Country code: update the flag and dial code in place (a full re-render would break browser autofill mid-fill)
+  document.addEventListener('change', (e) => {
+    if (!e.target.matches('[data-cc]')) return;
+    const cc = S.details.cc = e.target.value, box = e.target.closest('.phone-cc');
+    $('.phone-flag', box).textContent = flag(cc); $('.phone-dial', box).textContent = dial(cc);
+  });
   document.addEventListener('change', (e) => {
     const f = e.target.dataset && e.target.dataset.field;
     if (f) S[f] = e.target.value;
@@ -777,26 +784,38 @@
   document.addEventListener('pointerover', warm);
   document.addEventListener('focusin', warm);
 
-  // ---------- Why carousel: static frame, content changes every 5 s ----------
-  // The active dot's progress bar is a 5 s CSS animation; when it ends we advance. Hover/focus pauses it.
+  // ---------- Why travel by sea: one reason highlighted at a time, its photo on the right ----------
+  // The active reason's progress bar is a 5 s CSS animation; when it ends we move on. Hover/focus pauses it.
   const why = $('#why');
   if (why) {
-    const slides = [...why.querySelectorAll('.why-slide')], dots = [...why.querySelectorAll('.why-dot')];
+    const items = [...why.querySelectorAll('.why-item')], imgs = [...why.querySelectorAll('.why-img')];
     let cur = 0;
     const show = (i) => {
-      cur = (i + slides.length) % slides.length;
-      slides.forEach((s, j) => { s.classList.toggle('is-active', j === cur); s.setAttribute('aria-hidden', String(j !== cur)); });
-      dots.forEach((d, j) => { if (j === cur) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current'); });
+      cur = (i + items.length) % items.length;
+      items.forEach((it, j) => { if (j === cur) it.setAttribute('aria-current', 'true'); else it.removeAttribute('aria-current'); });
+      imgs.forEach((im, j) => im.classList.toggle('on', j === cur));
     };
     why.addEventListener('animationend', (e) => { if (e.target.classList.contains('why-bar')) show(cur + 1); });
-    why.addEventListener('click', (e) => { const d = e.target.closest('[data-why]'); if (d) show(+d.dataset.why); });
+    why.addEventListener('click', (e) => { const it = e.target.closest('[data-why]'); if (it) show(+it.dataset.why); });
     const pause = (on) => why.classList.toggle('paused', on);
     why.addEventListener('mouseenter', () => pause(true));
     why.addEventListener('mouseleave', () => pause(false));
     why.addEventListener('focusin', () => pause(true));
     why.addEventListener('focusout', () => pause(false));
-    // Only run while on screen
-    new IntersectionObserver(([en]) => why.classList.toggle('offscreen', !en.isIntersecting)).observe(why); // (no longer on the page)
+    // Only run while on screen (otherwise you'd scroll back to a random reason)
+    new IntersectionObserver(([en]) => why.classList.toggle('offscreen', !en.isIntersecting)).observe(why);
+  }
+
+  // ---------- Hero background: crossfade to the next photo every 6 s ----------
+  const heroSlides = [...document.querySelectorAll('#heroSlides .hero-slide')];
+  if (heroSlides.length > 1) {
+    let hi = 0;
+    setInterval(() => {
+      if (document.hidden || $('#home').hidden) return;
+      heroSlides[hi].classList.remove('on');
+      hi = (hi + 1) % heroSlides.length;
+      heroSlides[hi].classList.add('on');
+    }, 6000);
   }
 
   // ---------- Hero: one benefit at a time ----------

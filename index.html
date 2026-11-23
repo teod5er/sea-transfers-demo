@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="">
-<link rel="stylesheet" href="styles.css?v=150">
+<link rel="stylesheet" href="styles.css?v=165">
 </head>
 <body>
 <div class="hc">
@@ -46,10 +46,21 @@
 
   <!-- HERO -->
   <section class="hero">
-    <picture>
-      <source media="(max-width: 640px)" srcset="img/hero-bg-m.jpg">
-      <img class="hero-media" src="img/hero-bg.jpg" alt="" aria-hidden="true">
-    </picture>
+    <!-- Background carousel: crossfades every 6 s (app.js) -->
+    <div class="hero-slides" id="heroSlides" aria-hidden="true">
+      <picture class="hero-slide on">
+        <source media="(max-width: 640px)" srcset="img/hero-bg-m.jpg">
+        <img class="hero-media" src="img/hero-bg.jpg" alt="">
+      </picture>
+      <picture class="hero-slide hs-2">
+        <source media="(max-width: 640px)" srcset="img/hero-bg-2-m.jpg">
+        <img class="hero-media" src="img/hero-bg-2.jpg" alt="" loading="lazy">
+      </picture>
+      <picture class="hero-slide hs-3">
+        <source media="(max-width: 640px)" srcset="img/hero-bg-3-m.jpg">
+        <img class="hero-media" src="img/hero-bg-3.jpg" alt="" loading="lazy">
+      </picture>
+    </div>
     <div class="wrap hero-in">
       <div class="hero-boxes">
       <div class="hero-card rise">
@@ -60,6 +71,15 @@
         <ul class="sr-only"><li>No road traffic</li><li>Leave when you want</li><li>One price per boat</li><li>Luggage on board</li></ul>
       </div>
       </div>
+      <!-- About Hvar Charter: fleet from hvarcharter.com (11 boats listed under Boat Rental) -->
+      <aside class="hero-hc rise" style="animation-delay:.15s" aria-label="About Hvar Charter">
+        <span class="hc-k">By Hvar Charter</span>
+        <p class="hc-t">Our own boats and skippers</p>
+        <dl class="hc-stats">
+          <div><dt>11</dt><dd>boats</dd></div>
+          <div><dt>Riva 13</dt><dd>office in Hvar town</dd></div>
+        </dl>
+      </aside>
     </div>
   </section>
 
@@ -97,16 +117,25 @@
     <div class="dgrid" id="cards"></div>
   </section>
 
-  <!-- WHY SEA TRANSFERS -->
+  <!-- WHY SEA TRANSFERS: reasons on the left, a photo on the right.
+       Every 5 s the next reason is highlighted and its photo fades in (app.js). -->
   <section class="whyband">
-    <div class="wrap why-in">
-      <h2 class="t-h1 reveal">Why travel by sea</h2>
-      <p class="muted t-16 reveal why-sub">The fastest way between Split and the islands in summer, without the ferry queue.</p>
-      <div class="why-grid2 reveal">
-        <div class="why-cell"><h3 class="why-t">Your time, not a timetable</h3><p class="muted why-p">Leave early, late or right after landing. The boat waits for you.</p></div>
-        <div class="why-cell"><h3 class="why-t">Straight from pier to pier</h3><p class="muted why-p">No bus into Split, no port queue, no drive across the island.</p></div>
-        <div class="why-cell"><h3 class="why-t">One price for the boat</h3><p class="muted why-p">Skipper and luggage included, however many of you travel.</p></div>
-        <div class="why-cell"><h3 class="why-t">Local, licensed skippers</h3><p class="muted why-p">[Years] on Hvar. We know every bay, port and weather window.</p></div>
+    <div class="wrap why-in why-split" id="why">
+      <div class="why-l">
+        <h2 class="t-h1 reveal">Why travel by sea</h2>
+        <p class="muted t-16 reveal why-sub">The fastest way between Split and the islands in summer, without the ferry queue.</p>
+        <ol class="why-list" role="list">
+          <li><button type="button" class="why-item" data-why="0" aria-current="true"><span class="why-bar" aria-hidden="true"></span><span class="why-txt"><span class="why-t">Your time, not a timetable</span><span class="muted why-p">Leave early, late or right after landing. The boat waits for you.</span></span></button></li>
+          <li><button type="button" class="why-item" data-why="1"><span class="why-bar" aria-hidden="true"></span><span class="why-txt"><span class="why-t">Straight from pier to pier</span><span class="muted why-p">No bus into Split, no port queue, no drive across the island.</span></span></button></li>
+          <li><button type="button" class="why-item" data-why="2"><span class="why-bar" aria-hidden="true"></span><span class="why-txt"><span class="why-t">One price for the boat</span><span class="muted why-p">Skipper and luggage included, however many of you travel.</span></span></button></li>
+          <li><button type="button" class="why-item" data-why="3"><span class="why-bar" aria-hidden="true"></span><span class="why-txt"><span class="why-t">Local, licensed skippers</span><span class="muted why-p">Based in Hvar town. We know every bay, port and weather window.</span></span></button></li>
+        </ol>
+      </div>
+      <div class="why-media">
+        <img class="why-img on" src="img/split-airport.jpg" alt="Speedboat waiting at the pier by Split Airport" loading="lazy">
+        <img class="why-img" src="img/hvar.jpg" alt="Hvar town harbour from the sea" loading="lazy">
+        <img class="why-img" src="img/boat-barracuda.jpg" alt="Comfort boat with shade and room for luggage" loading="lazy">
+        <img class="why-img" src="img/vis.jpg" alt="Quiet bay on the island of Vis" loading="lazy">
       </div>
     </div>
   </section>
@@ -180,9 +209,9 @@
 </main>
 
 <!-- Contact buttons, stacked bottom right: Instagram, email, WhatsApp
-     TODO: real email address and Instagram profile (placeholders below) -->
+     TODO: real email address (hvarcharter.com lists none, only a contact form) -->
 <div class="fab" aria-label="Contact us">
-  <a class="fab-btn fab-ig" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Hvar Charter on Instagram"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+  <a class="fab-btn fab-ig" href="https://www.instagram.com/hvarcharter/" target="_blank" rel="noopener" aria-label="Hvar Charter on Instagram"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
   <a class="fab-btn fab-mail" href="mailto:info@hvarcharter.com" aria-label="Email us"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>
   <a class="wa" href="https://wa.me/385916129515" target="_blank" rel="noopener" aria-label="Message us on WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg></a>
 </div>
@@ -239,7 +268,7 @@
   </div>
 </div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin=""></script>
-<script src="routes.js?v=150"></script>
-<script src="app.js?v=150"></script>
+<script src="routes.js?v=165"></script>
+<script src="app.js?v=165"></script>
 </body>
 </html>
