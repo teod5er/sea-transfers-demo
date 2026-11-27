@@ -5,24 +5,34 @@
 
   // ---------- Data ----------
   const D = [
-    { name: 'Split Airport', pier: 'Pier next to the airport terminal', desc: 'Land and step straight onto the boat. No taxi into town, no ferry queue.', img: 'img/split-airport.jpg', alt: 'Inside the Split Airport terminal' },
-    { name: 'Split', pier: 'Riva waterfront, city centre', desc: 'Board on the Riva, a few steps from Diocletian’s Palace.', img: 'img/split.jpg', alt: 'Diocletian’s Palace and the Riva from above' },
-    { name: 'Hvar town', pier: 'Main harbour, by the square', desc: 'Arrive in the heart of town, right by the main square.', img: 'img/hvar.jpg', alt: 'Hvar harbour and the Pakleni Islands from the fortress' },
-    { name: 'Vis', pier: 'Vis town harbour', desc: 'The far island: quiet bays, local wine and an old fishing town.', img: 'img/vis.jpg', alt: 'Vis town harbour from the hill' },
-    { name: 'Bol', pier: 'Bol harbour, near the Golden Horn', desc: 'Brač’s sunny south side, a short walk from the Golden Horn beach.', img: 'img/bol.jpg', alt: 'The Golden Horn beach from above' },
-    { name: 'Korčula', pier: 'Below the old town walls', desc: 'Step off right below the walls of the medieval old town.', img: 'img/korcula.jpg', alt: 'Korčula old town on its peninsula' },
-    { name: 'Vela Luka', pier: 'Vela Luka harbour', desc: 'Korčula’s west end, tucked in a deep and sheltered bay.', img: 'img/vela-luka.jpg', alt: 'Vela Luka bay from the hills' },
-    { name: 'Komiža', pier: 'Komiža harbour, near the Blue Cave', desc: 'Fishing town under Mount Hum, the gateway to the Blue Cave.', img: 'img/komiza.jpg', alt: 'Komiža harbour from above' }
+    { name: 'Split Airport', pier: 'Pier next to the airport terminal', desc: 'Land and step straight onto the boat. No taxi into town, no ferry queue.', img: 'img/split-airport.jpg', alt: 'Inside the Split Airport terminal', about: 'Split Airport sits on the coast at Kaštela, 25 km west of Split. Our pier is a short walk from arrivals, so you go from the plane to the boat without a taxi or a ferry queue.',
+      gal: [{ img: 'img/split.jpg', alt: 'Split old town and the Riva' }, { img: 'img/boat-flyer.jpg', alt: 'A speedboat ready at the pier' }, { img: 'img/hvar.jpg', alt: 'Hvar town, an hour away by sea' }] },
+    { name: 'Split', pier: 'Riva waterfront, city centre', desc: 'Board on the Riva, a few steps from Diocletian’s Palace.', img: 'img/split.jpg', alt: 'Diocletian’s Palace and the Riva from above', about: 'Croatia’s second city grew inside a Roman emperor’s palace. You step off on the Riva, the palm-lined waterfront, a few minutes’ walk from the old town, the markets and the ferry port.',
+      gal: [{ img: 'img/split-airport.jpg', alt: 'Split Airport, 25 km along the coast' }, { img: 'img/boat-xp38.jpg', alt: 'Arriving on the Riva by boat' }, { img: 'img/hvar.jpg', alt: 'Hvar, the closest island town' }] },
+    { name: 'Hvar town', pier: 'Main harbour, by the square', desc: 'Arrive in the heart of town, right by the main square.', img: 'img/hvar.jpg', alt: 'Hvar harbour and the Pakleni Islands from the fortress', about: 'Hvar town is the island’s lively harbour: a Renaissance square, a hilltop fortress and the Pakleni Islands just offshore. Hvar Charter’s office is on the Riva, right where the boat comes in.',
+      gal: [{ img: 'img/red-rocks.jpg', alt: 'Red Rocks on Hvar’s south coast' }, { img: 'img/blue-cave.jpg', alt: 'The Blue Cave, a day trip from Hvar' }, { img: 'img/boat-barracuda.jpg', alt: 'Our boats in Hvar harbour' }] },
+    { name: 'Vis', pier: 'Vis town harbour', desc: 'The far island: quiet bays, local wine and an old fishing town.', img: 'img/vis.jpg', alt: 'Vis town harbour from the hill', about: 'Vis was a military zone until 1989, so it stayed quiet and unspoilt. Expect a calm harbour town, family wineries, empty bays and some of the clearest water in the Adriatic.',
+      gal: [{ img: 'img/komiza.jpg', alt: 'Komiža, on the other side of the island' }, { img: 'img/blue-cave.jpg', alt: 'The Blue Cave on nearby Biševo' }, { img: 'img/boat-xp38.jpg', alt: 'Island hopping by speedboat' }] },
+    { name: 'Bol', pier: 'Bol harbour, near the Golden Horn', desc: 'Brač’s sunny south side, a short walk from the Golden Horn beach.', img: 'img/bol.jpg', alt: 'The Golden Horn beach from above', about: 'Bol is the sunny south side of Brač, under Vidova Gora, the highest peak of the islands. The Golden Horn beach is a pleasant walk along the pines from the harbour.',
+      gal: [{ img: 'img/boat-barracuda.jpg', alt: 'Arriving in Bol by boat' }, { img: 'img/hvar.jpg', alt: 'Hvar, across the channel' }, { img: 'img/red-rocks.jpg', alt: 'Swim stops along the way' }] },
+    { name: 'Korčula', pier: 'Below the old town walls', desc: 'Step off right below the walls of the medieval old town.', img: 'img/korcula.jpg', alt: 'Korčula old town on its peninsula', about: 'Korčula’s old town sits on a small walled peninsula, its streets laid out like a fishbone to catch the breeze. Known for its stone carvers, local white wine and the sword dance.',
+      gal: [{ img: 'img/vela-luka.jpg', alt: 'Vela Luka, at the island’s west end' }, { img: 'img/boat-xp38.jpg', alt: 'Arriving below the town walls' }, { img: 'img/hvar.jpg', alt: 'Hvar, 75 minutes away by sea' }] },
+    { name: 'Vela Luka', pier: 'Vela Luka harbour', desc: 'Korčula’s west end, tucked in a deep and sheltered bay.', img: 'img/vela-luka.jpg', alt: 'Vela Luka bay from the hills', about: 'Vela Luka lies at the end of a long, sheltered bay on Korčula’s west side. Olive groves, small islets to swim off and a relaxed fishing-town pace.',
+      gal: [{ img: 'img/korcula.jpg', alt: 'Korčula old town, at the other end of the island' }, { img: 'img/boat-barracuda.jpg', alt: 'Arriving in the bay by boat' }, { img: 'img/vis.jpg', alt: 'Vis, across the open sea' }] },
+    { name: 'Komiža', pier: 'Komiža harbour, near the Blue Cave', desc: 'Fishing town under Mount Hum, the gateway to the Blue Cave.', img: 'img/komiza.jpg', alt: 'Komiža harbour from above', about: 'Komiža is a fishing town under Mount Hum on the west side of Vis. It’s the closest harbour to Biševo and the Blue Cave, and a quiet base for the outer islands.',
+      gal: [{ img: 'img/blue-cave.jpg', alt: 'The Blue Cave on Biševo' }, { img: 'img/vis.jpg', alt: 'Vis town, across the island' }, { img: 'img/boat-flyer.jpg', alt: 'Out to the islands by speedboat' }] }
   ];
+  // Wikipedia article for each port (the hero's "More about" button)
+  const WIKI = { 'Split Airport': 'Split_Airport', 'Split': 'Split,_Croatia', 'Hvar town': 'Hvar_(town)', 'Vis': 'Vis_(town)', 'Bol': 'Bol,_Croatia', 'Korčula': 'Korčula_(town)', 'Vela Luka': 'Vela_Luka', 'Komiža': 'Komiža' };
   const LL = { 'Split Airport': [43.535, 16.300], 'Split': [43.503, 16.440], 'Hvar town': [43.172, 16.441], 'Vis': [43.061, 16.183], 'Bol': [43.261, 16.655], 'Korčula': [42.961, 17.136], 'Vela Luka': [42.963, 16.718], 'Komiža': [43.043, 16.090] };
   // Real Hvar Charter prices from Hvar town: [minutes, €]. Other routes are a distance-based estimate.
   const REAL = { 'Split Airport': [64, 450], 'Split': [55, 400], 'Vis': [29, 280], 'Bol': [44, 350], 'Korčula': [74, 480], 'Vela Luka': [43, 350], 'Komiža': [50, 450] };
   // Placeholder upgrade prices
-  const COMFORT_ADD = 100, LUXURY_ADD = 300, SWIM_PRICE = 120;
+  const PREMIUM_ADD = 100, LUXURY_ADD = 300, SWIM_PRICE = 120;
   const BOATS = [
     { name: 'Standard', model: 'Flyer 828 RIB', perk: 'fast, open-air', add: 0, img: 'img/boat-flyer.jpg', tier: 'std', why: ['Best price', 'Fastest ride', 'Open-air'] },
-    { name: 'Comfort', model: 'Barracuda 730', perk: 'shade, room for bags', add: COMFORT_ADD, img: 'img/boat-barracuda.jpg', tier: 'cmf', badge: 'Most popular choice', why: ['Shade on board', 'Room for luggage', 'Good for families'] },
-    { name: 'Luxury', model: 'XP 38', perk: 'lounge and cabin', add: LUXURY_ADD, img: 'img/boat-xp38.jpg', tier: 'lux', why: ['Cabin and lounge', 'Smoothest ride', 'Big groups'] }
+    { name: 'Premium', model: 'Barracuda 730', perk: 'shade, room for bags', add: PREMIUM_ADD, img: 'img/boat-barracuda.jpg', tier: 'cmf', badge: 'Most popular choice', why: ['Shade on board', 'Room for luggage', 'Good for families'] },
+    { name: 'Luxury', model: 'XP 38', perk: 'lounge and cabin', add: LUXURY_ADD, img: 'img/boat-xp38.jpg', tier: 'lux', badge: 'Most pleasant ride', why: ['Cabin and lounge', 'Smoothest ride', 'Big groups'] }
   ];
   const HC = [
     { title: 'Private boat tours', text: 'Blue Cave, Pakleni Islands, Red Rocks or your own route, with a skipper.', tag: 'From Hvar', cta: 'See more', img: 'img/blue-cave.jpg', alt: 'Blue light inside the Blue Cave' },
@@ -70,6 +80,7 @@
       container: el, style: structuredClone(st), bounds, fitBoundsOptions: { padding, maxZoom: 12.5 },
       interactive, attributionControl: attribution ? { compact: true } : false, dragRotate: false, pitchWithRotate: false, touchPitch: false
     });
+    map._rb = bounds; map._rp = padding;
     if (interactive) { map.scrollZoom.disable(); map.touchZoomRotate.disableRotation(); if (window.matchMedia('(max-width: 640px)').matches) map.dragPan.disable(); }
     let alive = true; map.on('remove', () => { alive = false; });
     map.on('load', () => {
@@ -167,6 +178,7 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const toGrid = () => setTimeout(() => { const g = $('#grid'); if (g) scrollTo(g.getBoundingClientRect().top + window.scrollY - 12); }, 40);
   const ARROW = (s = 16) => `<svg class="go" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+  const TAGCK = '<svg class="tag-ck" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>';
   const CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>';
 
   // ---------- State ----------
@@ -257,7 +269,17 @@
   const onScroll = () => {
     const fab = $('.fab'), y = window.scrollY;
     if (fab && Math.abs(y - lastY) > 6) { fab.classList.toggle('hide', y > lastY && y > 120); lastY = y; }
-    if (isBooking()) { const bh = $('#bkHead'); if (bh) bh.classList.toggle('scrolled', window.scrollY > $('#topbar').offsetHeight); return; } // same size; only the dropdown buttons hide once pinned
+    if (isBooking()) {
+      // the trip header stays hidden at first and slides in, pinned to the top, once you scroll past the hero
+      const bh = $('#bkHead'), hero = $('.dst-hero');
+      if (bh) {
+        const point = hero ? hero.offsetTop + hero.offsetHeight * 0.6 : 200, on = bh.classList.contains('show');
+        const pmOpen = !($('#pm') || {}).hidden;
+        const want = pmOpen && on ? true : on ? y > point - HYST : y > point;
+        if (want !== on) { bh.classList.toggle('show', want); bh.classList.toggle('scrolled', want); bh.toggleAttribute('inert', !want); }
+      }
+      return;
+    }
     const el = $('#origins'), h = $('.hero');
     // the bar scrolls away with the page; a compact copy pins to the top only once the bar is fully off screen
     if (el && h && !S.dd) stickAt(el, true, el.offsetTop + el.offsetHeight);
@@ -320,7 +342,7 @@
             ${BOATS.map((b, j) => { const on = j === S.tier; return `
             <button type="button" class="opt choice" role="radio" data-tier="${j}" aria-checked="${on}" aria-pressed="${on}">
               <img src="${b.img}" alt="">
-              <span class="choice-t"><b>${b.name}</b><span class="choice-tags">${b.why.map((w) => `<span class="tag">${esc(w)}</span>`).join('')}</span></span>
+              <span class="choice-t"><b>${b.name}</b><span class="choice-tags">${b.why.map((w) => `<span class="tag">${TAGCK}${esc(w)}</span>`).join('')}</span></span>
               <span class="choice-pw">${b.badge ? `<span class="tag tag-pop">${esc(b.badge)}</span>` : ''}<span class="choice-p">${r[1] + b.add} €</span></span>
               <span class="radio${on ? ' on' : ''}" aria-hidden="true"></span>
             </button>`; }).join('')}
@@ -437,7 +459,7 @@
     mapStyle().then((st) => {
       if (`${S.o}-${S.m}` !== key || !isBooking()) return;
       const hero = $('#bkMap');
-      if (hero) bkMaps.push(makeMap(hero, seaRoute(S.o, S.m), st, { interactive: true, padding: mobile ? 32 : 64, boat: true, attribution: true }));
+      if (hero) bkMaps.push(makeMap(hero, seaRoute(S.o, S.m), st, { interactive: true, padding: 20, boat: true, attribution: true }));
       buildPinMap('pick', st); buildPinMap('drop', st);
     });
   };
@@ -500,7 +522,7 @@
       return;
     }
     if (f.dir === 'arr' && S.o !== 0) { S.o = 0; if (S.m === 0) S.m = 2; history.replaceState({ m: S.m, o: S.o }, ''); }
-    const y = window.scrollY; renderBooking(); window.scrollTo(0, y);
+    const y = window.scrollY; renderBooking(); window.scrollTo(0, y); onScroll();
     const b = $('[data-fl-open]'); if (b) b.focus({ preventScroll: true });
   };
   $('#flight').addEventListener('click', (e) => {
@@ -512,11 +534,39 @@
   $('#flForm').addEventListener('submit', (e) => { e.preventDefault(); flFound ? useFlight() : findFlight(); });
   $('#flInput').addEventListener('input', () => { if (flFound) { flFound = null; $('#flRes').innerHTML = ''; $('#flGo').textContent = 'Find flight'; } });
 
+  // Destination carousel arrows: scroll by one photo
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-car]'); if (!b) return;
+    const car = $('#dstCar'), fig = car && car.querySelector('.dst-fig'); if (!fig) return;
+    const step = fig.getBoundingClientRect().width + parseFloat(getComputedStyle(car).columnGap || 16);
+    const dir = +b.dataset.car, end = car.scrollLeft + car.clientWidth >= car.scrollWidth - 4;
+    if (dir > 0 && end) car.scrollTo({ left: 0, behavior: 'smooth' });
+    else if (dir < 0 && car.scrollLeft <= 4) car.scrollTo({ left: car.scrollWidth, behavior: 'smooth' });
+    else car.scrollBy({ left: dir * step, behavior: 'smooth' });
+  });
+
   const renderBooking = () => {
     const from = D[S.o], to = D[S.m], r = route(from, to);
     $('#booking').innerHTML = `
+      <!-- Destination hero: photo of the town you arrive in, with a short intro -->
+      <section class="dst-hero" aria-labelledby="dstTitle">
+        <!-- Photo carousel: only photos of the destination itself (its main photo + any in "hero"), crossfading every 5 s -->
+        ${[{ img: to.img, alt: to.alt }, ...(to.hero || [])].map((g, i) => `<img class="dst-img dst-slide${i ? '' : ' on'}" src="${g.img}" alt="${i ? '' : esc(g.alt)}"${i ? ' loading="lazy" aria-hidden="true"' : ''}>`).join('')}
+        <div class="wrap dst-in">
+          <div class="dst-box">
+            <span class="dst-k">${esc(from.name)} →</span>
+            <h2 class="dst-t" id="dstTitle">${esc(to.name)}</h2>
+            <p class="dst-p">${esc(to.about || to.desc)}</p>
+            ${WIKI[to.name] ? `<a class="btn btn-sm dst-more" href="https://en.wikipedia.org/wiki/${encodeURIComponent(WIKI[to.name])}" target="_blank" rel="noopener">More about ${esc(to.name)}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only"> (Wikipedia, opens in a new tab)</span></a>` : ''}
+          </div>
+          <!-- Route map next to the box; box and map each take half the width -->
+          <div class="bk-hero dst-map" id="dstMap">
+            <div class="bk-map" id="bkMap" role="img" aria-label="${esc(`Map of the sea route from ${from.name} to ${to.name}`)}"></div>
+          </div>
+        </div>
+      </section>
       <!-- Sticky trip header, built like the home page's "Going from" bar -->
-      <header class="bk-head" id="bkHead">
+      <header class="bk-head" id="bkHead" inert>
         <div class="wrap bk-head-in">
           <!-- Same search-style field as the home page: From | To, each with photo, label, port and Change -->
           <div class="bk-pickwrap">
@@ -538,16 +588,27 @@
           </div>
         </div>
       </header>
-      <!-- Hero: animated route map (the line draws in, then a boat sails it) -->
-      <section class="wrap bk-mapsec">
-        <div class="bk-hero"><div class="bk-map" id="bkMap" role="img" aria-label="${esc(`Map of the sea route from ${from.name} to ${to.name}`)}"></div></div>
-      </section>
       <section class="wrap bk-main">
         ${optsHTML(r, from, to, 'a')}
         ${step(3, 'meet', 'Where do we meet you?', 'At the pier. To be picked up or dropped off somewhere else, drag the pin.', `
           <div class="meet">${meetItem('pick')}${meetItem('drop')}</div>`)}
         ${optsHTML(r, from, to, 'b')}
       </section>
+      ${(to.gal || []).length ? `
+      <!-- Photo carousel of the destination, last thing on the page -->
+      <section class="dst-gal-sec" aria-labelledby="dstGalT">
+        <div class="wrap dst-gal-head">
+          <h2 class="t-h2" id="dstGalT">${esc(to.name)} in pictures</h2>
+          <div class="dst-nav">
+            <button type="button" class="btn iconbtn" data-car="-1" aria-label="Previous photo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button type="button" class="btn iconbtn" data-car="1" aria-label="Next photo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="dst-car" id="dstCar" tabindex="0" aria-label="Photos of ${esc(to.name)}">
+          ${[{ img: to.img, alt: to.alt }, ...to.gal].map((g) => `
+          <figure class="dst-fig"><img src="${g.img}" alt="${esc(g.alt)}" loading="lazy"><figcaption>${esc(g.alt)}</figcaption></figure>`).join('')}
+        </div>
+      </section>` : ''}
       ${barHTML(r)}`;
     initHero();
   };
@@ -571,7 +632,7 @@
     $('#topbar').classList.toggle('over', !bk); // white nav bar with the logo on the trip page
     $('#topbar').classList.remove('on-blue');
     if (!bk) dropBkMaps();
-    if (bk) renderBooking(); else { renderFrom(); renderCards(); }
+    if (bk) { renderBooking(); onScroll(); } else { renderFrom(); renderCards(); }
   };
 
   const goHome = () => { S.m = null; showView(); jumpTop(); };
@@ -632,7 +693,7 @@
     const mode = pmMode; closePM(false);
     if (mode === 'from') S.o = k; else S.m = k;
     history.replaceState({ m: S.m, o: S.o }, '');
-    const y = window.scrollY; renderBooking(); window.scrollTo(0, y);
+    const y = window.scrollY; renderBooking(); window.scrollTo(0, y); onScroll();
     const b = $(`[data-pm="${mode}"]`); if (b) b.focus({ preventScroll: true });
   };
 
@@ -691,6 +752,8 @@
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (t.closest('[data-home]')) { e.preventDefault(); goHome(); return; }
+    // FAQ in the nav: questions live on the home page, so go there first, then scroll to them
+    if (t.closest('[data-faq]')) { e.preventDefault(); if (isBooking()) goHome(); requestAnimationFrame(() => { const f = $('#faq'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); return; }
     if (t.closest('#fromBtn') || t.closest('#ddBtn')) {
       setDd(true);
       return;
@@ -720,7 +783,7 @@
     if (t.closest('[data-swap]')) {
       [S.o, S.m] = [S.m, S.o];
       history.replaceState({ m: S.m, o: S.o }, '');
-      const y = window.scrollY; renderBooking(); window.scrollTo(0, y);
+      const y = window.scrollY; renderBooking(); window.scrollTo(0, y); onScroll();
       const sw = $('[data-swap]'); if (sw) sw.focus({ preventScroll: true });
       return;
     }
@@ -805,6 +868,14 @@
     // Only run while on screen (otherwise you'd scroll back to a random reason)
     new IntersectionObserver(([en]) => why.classList.toggle('offscreen', !en.isIntersecting)).observe(why);
   }
+
+  // ---------- Trip hero: crossfade to the next destination photo every 5 s ----------
+  setInterval(() => {
+    if (document.hidden || !isBooking()) return;
+    const sl = [...document.querySelectorAll('#booking .dst-slide')]; if (sl.length < 2) return;
+    const i = sl.findIndex((x) => x.classList.contains('on'));
+    sl[i].classList.remove('on'); sl[(i + 1) % sl.length].classList.add('on');
+  }, 5000);
 
   // ---------- Hero background: crossfade to the next photo every 6 s ----------
   const heroSlides = [...document.querySelectorAll('#heroSlides .hero-slide')];

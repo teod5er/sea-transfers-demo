@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="">
-<link rel="stylesheet" href="styles.css?v=165">
+<link rel="stylesheet" href="styles.css?v=178">
 </head>
 <body>
 <div class="hc">
@@ -23,6 +23,7 @@
     </a>
     <div class="nav-r">
       <a href="#" class="nav-link">About us</a>
+      <a href="#faq" class="nav-link" data-faq>FAQ</a>
       <!-- Language: dropdown, styled like the Back to Hvar Charter button -->
       <div class="lang" id="lang">
         <button type="button" class="btn menubtn lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList" aria-label="Language: English">
@@ -71,15 +72,6 @@
         <ul class="sr-only"><li>No road traffic</li><li>Leave when you want</li><li>One price per boat</li><li>Luggage on board</li></ul>
       </div>
       </div>
-      <!-- About Hvar Charter: fleet from hvarcharter.com (11 boats listed under Boat Rental) -->
-      <aside class="hero-hc rise" style="animation-delay:.15s" aria-label="About Hvar Charter">
-        <span class="hc-k">By Hvar Charter</span>
-        <p class="hc-t">Our own boats and skippers</p>
-        <dl class="hc-stats">
-          <div><dt>11</dt><dd>boats</dd></div>
-          <div><dt>Riva 13</dt><dd>office in Hvar town</dd></div>
-        </dl>
-      </aside>
     </div>
   </section>
 
@@ -134,7 +126,7 @@
       <div class="why-media">
         <img class="why-img on" src="img/split-airport.jpg" alt="Speedboat waiting at the pier by Split Airport" loading="lazy">
         <img class="why-img" src="img/hvar.jpg" alt="Hvar town harbour from the sea" loading="lazy">
-        <img class="why-img" src="img/boat-barracuda.jpg" alt="Comfort boat with shade and room for luggage" loading="lazy">
+        <img class="why-img" src="img/boat-barracuda.jpg" alt="Premium boat with shade and room for luggage" loading="lazy">
         <img class="why-img" src="img/vis.jpg" alt="Quiet bay on the island of Vis" loading="lazy">
       </div>
     </div>
@@ -193,7 +185,7 @@
   </section>
 
   <!-- FAQ -->
-  <section class="wrap sec">
+  <section class="wrap sec" id="faq">
     <h2 class="t-h2 faq-head">Questions</h2>
     <div class="box faqbox">
       <details class="faq"><summary class="t-16">Where do we meet the boat at Split Airport?<span class="plus" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary><p class="muted t-14">At the pier next to the airport. We send you a map pin.</p></details>
@@ -268,7 +260,7 @@
   </div>
 </div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin=""></script>
-<script src="routes.js?v=165"></script>
-<script src="app.js?v=165"></script>
+<script src="routes.js?v=169"></script>
+<script src="app.js?v=178"></script>
 </body>
 </html>
